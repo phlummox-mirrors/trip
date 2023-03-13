@@ -1,0 +1,18 @@
+#include "../macs.h"
+#include <stdio.h>
+DEF(int, fclose, (FILE *f), ( f), (EOF), EINTR,EIO,ENOSPC,EDQUOT,ENOSPC,EPIPE)
+DEF(FILE *, fdopen, (int fd, const char *mode), ( fd, mode), (NULL), ENOMEM)
+DEF(int, fflush, (FILE *f), ( f), (EOF), EINTR,EIO,ENOSPC)
+DEF(int, fgetc, (FILE *f), ( f), (EOF), EINTR,EIO)
+DEF(char*, fgets, (char *b, int s, FILE * f), ( b, s, f), (NULL), EBADF,EINTR,EIO,EOVERFLOW,ENOMEM,ENXIO)
+DEF(FILE *, fopen, (const char *f, const char *m), ( f, m), (NULL), ENOMEM,EACCES)
+DEF(int, fputc, (int c, FILE *f), ( c, f), (EOF), EINTR,EIO,ENOSPC,ENOMEM)
+DEF(int, putc, (int c, FILE *f), ( c, f), (EOF), EINTR,EIO,ENOSPC,ENOMEM)
+DEF(int, fputs, (const char *s, FILE *f), ( s, f), (EOF), EINTR,EIO,ENOSPC,ENOMEM)
+DEF(size_t, fread, (void *m, size_t s, size_t n, FILE *f), ( m, s, n, f), (0), EINTR,EIO,ENOMEM)
+DEF(size_t, fwrite, (const void *m, size_t s, size_t n, FILE *f), ( m, s, n, f), (0), EINTR,EIO,ENOSPC,ENOMEM)
+DEF(ssize_t, getdelim, (char **p, size_t *n, int d, FILE *f), ( p, n, d, f), (-1), ENOMEM)
+DEF(ssize_t, getline, (char **p, size_t *n, FILE *f), ( p, n, f), (-1), ENOMEM)
+DEF(int, puts, (const char *s), ( s), (-42), EINTR,EIO,ENOSPC,ENOMEM)
+DEF(int, remove, (const char *fn), ( fn), (-1), EACCES,EBUSY,EFAULT,EINVAL,EIO,EISDIR,ELOOP,ENAMETOOLONG,ENOENT,ENOMEM,ENOTDIR,ENOTEMPTY,EPERM,EROFS)
+DEF(int, rename, (const char *a, const char *b), ( a, b), (-1), EACCES,EBUSY,EDQUOT,EFAULT,ELOOP,EMLINK,ENAMETOOLONG,ENOENT,ENOMEM,ENOSPC,ENOTEMPTY,EEXIST,EPERM,EACCES,EROFS)

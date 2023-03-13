@@ -1,0 +1,149 @@
+.Dd Mar 12, 2023
+.Dt TRIP 1
+.Os
+.Sh NAME
+.Nm trip
+.Nd Specify C library to fail
+.Sh SYNOPSIS
+.Nm
+.Ar "func[:chance[:errno]]"
+.Ar command
+.Ar arguments...
+.Nm
+.Fl m
+.Ar "func[:chance[:errno]]..."
+.Li end
+.Ar command
+.Ar arguments...
+.Nm
+.Op Fl l
+.Op Fl v
+.Op Fl h
+.Sh DESCRIPTION
+Using
+.Nm
+you can start a program and intentionally trigger libc
+.Pq "C standard library"
+library function calls to fail.  This can be useful during testing
+when you want to simulate an edge-case or a possible restriction, and
+inspect how your program will behave.  It is best to use
+.Nm
+on software built without compiler optimisations, so that you can tell
+more easily what library functions the program will be using.
+.Pp
+The default mode of operation is to list a single function to
+.Qq trip
+when invoked, followed by a command.  For example we can prevent
+.Li echo
+from allocating memory using
+.Li malloc :
+.Bd -literal -offset indent
+$ trip malloc echo hi
+malloc: Cannot allocate memory
+.Ed
+.Pp
+You can modify the default behaviour using the following flags:
+.Bl -tag -width Ds
+.It Fl m
+Accept multiple functions to
+.Qq trip ,
+terminating the list with a
+.Ql end .
+.It Fl l
+List all functions that
+.Nm
+knows how to
+.Qq trip .
+.It Fl v
+Print version information.
+.It Fl h
+Print a help message.
+.It Fl d
+Print debugging information during execution.  This option has to be
+enable at compile time, so it could be missing from your installation.
+.El
+.Pp
+Note that
+.Nm
+can get confused if the command you invoke also uses flags.  In that
+case it is best to prefix the command with a
+.Fl -
+delimiting the
+.Nm
+specifications from the sub-command.
+.Pp
+Keep in mind that
+.Nm
+requires
+.Ar command
+to be a dynamically bound executable.  If this is not the case,
+.Nm
+will have no effect.
+.Ss Trip specifications
+When specifying a function to
+.Qq trip
+the only necessary information is the function name.  In this case the
+function will always fail with a random
+.Li errno
+value, as specified for the requested function.
+.Pp
+You can exert greater control of the behaviour of
+.Nm
+by specifying a chance of
+.Qq tripping
+a function and a specific
+.Li errno
+value the function should set
+.Pq "in case the error handling depends on the kind of error" .
+You can omit the chance or the error code.  The fields of the
+specification are separable with most other non-alphanumeric ASCII
+characters that have no shell-significance
+.Po
+.Ql / ,
+.Ql ' ,
+.Ql @ ,
+.Ql % ,
+.Ql ^ ,
+.Ql - ,
+.Ql _
+or
+.Ql +
+.Pc .
+.Pp
+For example
+.Li mkdir:0.2:ELOOP
+will make
+.Li mkdir
+fail 20% of the time, in which case it will set
+.Li errno
+to
+.Li ELOOP
+.Pq "Too many levels of symbolic links" .
+If the chance is greater than 1, then
+.Nm
+will interpret it as a
+.Qq "one over n"
+chance.
+.Sh EXIT STATUS
+In the default mode,
+.Nm
+will not exit if successful, and instead execute the requested
+command.  It will exit with a >0 error code if an error occurs.
+.Sh COMPATIBILITY
+.Nm
+is currently only known to work on GNU/Linux systems with
+.Li LD_PRELOAD
+support.  In principle, it should be possible to extend support to
+other platforms.
+.Pp
+.Nm
+does not support variable argument functions.
+.Sh AUTHORS
+.Nm
+was written by
+.An Philip Kaludercic Aq philip.kaludercic@fau.de .
+.Sh SEE ALSO
+.Xr gdb 1 ,
+.Xr valgrind 1 ,
+.Xr strace 1 ,
+.Xr cppcheck 1

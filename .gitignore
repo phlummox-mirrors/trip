@@ -1,0 +1,20 @@
+# All dot files
+.*
+!.gitignore
+!.dir-locals.el
+
+# Generated files
+db/*.c
+
+# Executables
+trip
+fix-pie
+
+# Certain extensions
+*.o
+*.pdf
+*.html
+*.out
+
+# Test files
+test*
