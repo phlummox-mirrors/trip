@@ -18,7 +18,7 @@
 CFLAGS   = -std=gnu99 -fPIC -Wall -Wextra -Werror -ggdb3
 LDFLAGS  = -ldl
 
-ifeq ($(shell whoami), root)
+ifeq ($(shell id -u), 0)
 PREFIX   = /usr/local
 else
 PREFIX   = $(HOME)/.local
