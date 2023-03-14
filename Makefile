@@ -25,10 +25,10 @@ PREFIX   = $(HOME)/.local
 endif
 
 # The list of all functions that trip knows about are specified in
-# ".d" files under the "db" directory.
-DB      != find db -name '*.d'
-GENSRC   = $(patsubst %.d,%.c,$(DB))
-OBJ      = $(patsubst %.d,%.o,$(DB)) trip.o
+# ".db" files under the "db" directory.
+DB      != find db -name '*.db'
+GENSRC   = $(patsubst %.db,%.c,$(DB))
+OBJ      = $(patsubst %.db,%.o,$(DB)) trip.o
 
 AWK      = awk
 RM       = rm -f
