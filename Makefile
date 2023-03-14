@@ -44,7 +44,7 @@ trip.o: $(GENSRC) Makefile
 trip.o: CC := grep -h '^DEF' $(GENSRC) | sort | $(CC)
 $(OBJ): macs.h trip.h
 
-$(GENSRC): %.c: %.d gen.awk Makefile
+$(GENSRC): %.c: %.db gen.awk Makefile
 	$(AWK) -f gen.awk $< > $@
 
 .PHONY: install
