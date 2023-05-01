@@ -38,28 +38,27 @@ BEGIN {
 
 function gen() {
     if (length(data) <= 1) {
-	return;
+        return;
     }
 
     args = gensub(/(^|(,))([[:space:]]*[[:alnum:]_]+[[:space:]]*(\*|\[\])*[[:space:]]*)+(\[\]|\*|[[:space:]])[[:space:]]*(const[[:space:]]+)?([[:alnum:]_]+)/,
-		  "\\2 \\7", "g",
-		  data["params"])
+                  "\\2 \\7", "g",
+                  data["params"])
 
     if (data["name"] in seen) {
-	print "Duplicate entry on ", FILENAME ":" NR > "/dev/stderr"
-	exit 1;
+        print "Duplicate entry on ", FILENAME ":" NR > "/dev/stderr"
+        exit 1;
     }
     seen[data["name"]] = 1;
 
     print                                               \
-	"DEF(" data["return"] ",",                      \
-	data["name"] ",",                               \
-	"(" data["params"] "),",                        \
-	"(" args "),",                                  \
-	"(" data["fail"] "),",                       \
-	data["errno"] ")"
+        "DEF(" data["return"] ",",                      \
+        data["name"] ",",                               \
+        "(" data["params"] "),",                        \
+        "(" args "),",                                  \
+        "(" data["fail"] "),",				\
+        data["errno"] ")"
     delete data;
-
 }
 
 /^[[:space:]]*$/ { gen(); }
