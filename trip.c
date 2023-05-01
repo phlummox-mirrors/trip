@@ -128,7 +128,7 @@ init()
     char *tok = NULL, *s1 = NULL, *s2 = NULL;
     while (NULL != (tok = strtok_r(tok ? NULL : copy, RS, &s1))) {
         if (count >= LENGTH(entries)) {
-            fprintf(stderr, "Overlong configuration (%d >= %ld)\n",
+            fprintf(stderr, "Overlong configuration (%d >= %u)\n",
                     count, LENGTH(entries));
             abort();
         }

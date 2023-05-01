@@ -1,4 +1,4 @@
-/* Copyright 2020-2022 Philip Kaludercic
+/* Copyright 2020-2023 Philip Kaludercic
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -17,6 +17,6 @@
 #include <stdbool.h>
 #include <stdlib.h>
 
-#define LENGTH(arr) (sizeof(arr)/sizeof(*(arr)))
+#define LENGTH(arr) (unsigned) (sizeof(arr)/sizeof(*(arr)))
 
 bool ____trip_should_fail(char *name, int *errv, size_t errn);
