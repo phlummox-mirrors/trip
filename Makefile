@@ -15,7 +15,7 @@
 # <https://www.gnu.org/licenses/>.
 
 # Optional: CPPFLAGS = -DNDEBUG
-CFLAGS   = -std=gnu99 -Wall -Wextra -Werror
+CFLAGS   = -std=c99 -Wall -Wextra -Werror
 LDFLAGS  = -ldl
 
 ifeq ($(shell id -u), 0)
