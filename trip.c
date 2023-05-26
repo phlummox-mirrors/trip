@@ -414,7 +414,7 @@ usage(char *argv0)
 #ifndef NDEBUG
             "\t-d\tPrint debugging information\n"
 #endif
-            "\t-v\tPrint version\n"
+            "\t-V\tPrint version\n"
             "\t-h\tPrint this message\n");
     exit(EXIT_SUCCESS);
 }
@@ -435,14 +435,14 @@ main(int argc, char *argv[])
      * start by parsing the command line. */
     int opt;
     bool multi = false;
-    while ((opt = getopt(argc, argv, "mlvdh")) != -1) {
+    while ((opt = getopt(argc, argv, "mlVdh")) != -1) {
         switch (opt) {
         case 'm':
             multi = true;
             break;
         case 'l':
             list();
-        case 'v':
+        case 'V':
             fprintf(stderr, "trip (Version %s)\n", VERSION);
             exit(EXIT_SUCCESS);
 #ifndef NDEBUG
