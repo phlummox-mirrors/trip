@@ -131,11 +131,14 @@ init()
         debug("debug mode enabled:", conf);
     }
 
+    char copy[strlen(conf) + 1];
+    strcpy(copy, conf);
+
     /* Parse environmental variable containing the configuration. */
     char *tok = NULL, *s1 = NULL, *s2 = NULL;
-    while (NULL != (tok = strtok_r(tok ? NULL : conf, RS, &s1))) {
+    while (NULL != (tok = strtok_r(tok ? NULL : copy, RS, &s1))) {
         if (count >= LENGTH(entries)) {
-            fprintf(stderr, "Overlong configuration (%d >= %u)\n",
+            dprintf(STDERR_FILENO, "Overlong configuration (%d >= %u)\n",
                     count, LENGTH(entries));
             abort();
         }
@@ -154,7 +157,7 @@ init()
 
         char *chance = strtok_r(NULL, GS, &s2);
         if (NULL == chance) {
-            fprintf(stderr, "Malformed trip configuration \"%s\"\n", conf);
+            dprintf(STDERR_FILENO, "Malformed trip configuration \"%s\"\n", conf);
             abort();
         }
 
@@ -162,7 +165,7 @@ init()
         errno = 0;
         e->chance = strtod(chance, &end);
         if ('\0' != *end || (0 == e->error && 0 != errno)) {
-            fprintf(stderr, "Malformed trip chance \"%s\"", chance);
+            dprintf(STDERR_FILENO, "Malformed trip chance \"%s\"", chance);
             if (errno != 0)
                  perror("strtod");
             abort();
@@ -170,14 +173,15 @@ init()
 
         char *code = strtok_r(NULL, GS, &s2);
         if (NULL == code) {
-            fprintf(stderr, "Malformed trip configuration \"%s\"\n", conf);
+            dprintf(STDERR_FILENO, "Malformed trip code \"%s\"\n", conf);
+
             abort();
         }
 
         errno = 0;
         e->error = strtol(code, &end, 16);
         if (*end != '\0' || errno != 0) {
-            fprintf(stderr, "Malformed trip error code \"%s\"\n", code);
+            dprintf(STDERR_FILENO, "Malformed trip error code \"%s\"\n", code);
             abort();
         }
 
