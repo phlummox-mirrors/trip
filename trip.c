@@ -170,6 +170,7 @@ init()
 
         count++;
     }
+    assert(count > 0);
 
     /* Initialise local PRNG (Mitchell-Moore, see TAOCP p. 26).  We use a
      * custom one so as to not interfere with rand from the standard
