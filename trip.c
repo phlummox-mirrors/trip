@@ -122,7 +122,12 @@ init()
     }
 
     /* copy configuration */
-    char copy[strlen(conf) + 1];
+    static char copy[1 << 12];
+    if (strlen(conf) + 1 > sizeof(copy)) {
+         debug("failed to initialise, overlong configuration");
+         ready = !ready;
+         return;
+    }
     strncpy(copy, conf, sizeof(copy));
 
     /* Parse environmental variable containing the configuration. */
