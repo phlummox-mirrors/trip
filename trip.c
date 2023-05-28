@@ -466,10 +466,15 @@ main(int argc, char *argv[])
     }
 
     if (multi) {
-        while (optind < argc && !!strcmp(argv[optind], "end")) {
+        while (optind < argc && !!strcmp(argv[optind], ".")) {
             enter(argv[optind]);
             optind++;
         }
+	if (argc <= optind) {
+            fprintf(stderr, "Unterminated list of functions\n");
+            exit(EXIT_FAILURE);
+	}
+        optind++;
     } else {
         enter(argv[optind]);
         optind++;
