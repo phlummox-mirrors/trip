@@ -476,12 +476,18 @@ main(int argc, char *argv[])
 
     /* Construct configuration */
     size_t size = strlen(ENVCONFNAME) + 1 + 1;
-    conf = malloc(size);
+    conf = malloc(size + 1);
     if (NULL == conf) {
         perror("malloc");
         exit(EXIT_FAILURE);
     }
-    strcpy(conf, debug_mode ? "D" : "");
+    strcpy(conf, ENVCONFNAME "=");
+    if (debug_mode) {
+         strcat(conf, "D");
+         /* we have allocated a byte more than indicated in size, for
+          * this debugging indicator */
+         size++;
+    }
 
     for (unsigned i = 0; i < count; ++i) {
         for (size_t n = 1024;; n <<= 1) {
@@ -505,13 +511,12 @@ main(int argc, char *argv[])
             break;
         }
     }
-    setenv(ENVCONFNAME, conf, 1);
 
     /* Get path to the shared library */
     char preload[1 << 12];
 
 #ifdef __linux__
-    strcpy(preload, "");
+    strcpy(preload, "LD_PRELOAD=");
     unsigned prefix = strlen(preload);
     int ret = readlink("/proc/self/exe", preload + prefix,
                        sizeof(preload) - prefix);
@@ -520,9 +525,7 @@ main(int argc, char *argv[])
         exit(EXIT_FAILURE);
     }
     preload[prefix + ret] = '\0';
-    setenv("LD_PRELOAD", preload, !0);
 #else
-    (void) preload;             /* suppress unused variable warning */
 #error "System is not supported"
 #endif
 
