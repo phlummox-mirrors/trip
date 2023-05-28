@@ -36,7 +36,7 @@
 
 #define GS "\035"           /* group separator */
 #define RS "\036"           /* record separator */
-#define DELIM ":/',@%^-_+"  /* delimiters in the skip configuration */
+#define DELIM ":/,"  /* delimiters in the skip configuration */
 
 /* Parsed configuration */
 static unsigned count = 0;
