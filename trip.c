@@ -370,7 +370,9 @@ enter(char *entry)
     if (1 >= num) {
         entries[count].chance = num;
     } else {
-        entries[count].chance = 1 / num;
+        fprintf(stderr, "The chance %g (for %s) is greater than 1\n", num,
+                func);
+        exit(EXIT_FAILURE);
     }
 
     if (NULL != error) {
