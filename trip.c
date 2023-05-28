@@ -118,6 +118,7 @@ init()
     if (conf[0] == 'D') {
         debug_mode = true;
         conf++;
+        debug("debug mode enabled:", conf);
     }
 
     /* copy configuration */
