@@ -61,4 +61,4 @@ uninstall:
 
 .PHONY: clean
 clean:
-	$(RM) $(GENSRC) $(OBJ) fix-pie
+	$(RM) $(GENSRC) $(OBJ) fix-pie trip
