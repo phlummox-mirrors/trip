@@ -98,6 +98,16 @@ _debug(char *words[], unsigned n)
 
 #endif
 
+/* Check if a function is supported by trip */
+static char*
+check(const char *fn)
+{
+    for (unsigned i = 0; i < LENGTH(names); ++i)
+         if (!strcmp(names[i].name, fn))
+              return names[i].name;
+    return NULL;
+}
+
 /* Function to parse the configuration */
 static void
 init()
@@ -121,18 +131,9 @@ init()
         debug("debug mode enabled:", conf);
     }
 
-    /* copy configuration */
-    static char copy[1 << 12];
-    if (strlen(conf) + 1 > sizeof(copy)) {
-         debug("failed to initialise, overlong configuration");
-         ready = !ready;
-         return;
-    }
-    strncpy(copy, conf, sizeof(copy));
-
     /* Parse environmental variable containing the configuration. */
     char *tok = NULL, *s1 = NULL, *s2 = NULL;
-    while (NULL != (tok = strtok_r(tok ? NULL : copy, RS, &s1))) {
+    while (NULL != (tok = strtok_r(tok ? NULL : conf, RS, &s1))) {
         if (count >= LENGTH(entries)) {
             fprintf(stderr, "Overlong configuration (%d >= %u)\n",
                     count, LENGTH(entries));
@@ -142,7 +143,14 @@ init()
         struct entry *e = &entries[count];
         *e = (struct entry) { .name = strtok_r(tok, GS, &s2) };
         assert(NULL != e->name);	/* otherwise we wouldn't be here */
+
+	char *dup;
+	if ((dup = check(e->name)) == NULL) {
+	  debug("unknown function", e->name);
+	  continue;
+	}
         debug("registering", e->name);
+	e->name = dup;
 
         char *chance = strtok_r(NULL, GS, &s2);
         if (NULL == chance) {
@@ -317,23 +325,13 @@ derrno(char *name)
     return val;
 }
 
-/* Check if a function is supported by trip */
-static bool
-check(const char *fn)
-{
-    for (unsigned i = 0; i < LENGTH(names); ++i)
-         if (!strcmp(names[i].name, fn))
-              return true;
-    return false;
-}
-
 /* Parse and add an ENTRY to the table entries. */
 static void
 enter(char *entry)
 {
     char *func, *chance, *error;
     func = strtok(entry, DELIM);
-    if (!check(func)) {
+    if (check(func) == NULL) {
         fprintf(stderr, "Unknown function \"%s\", cannot trip\n", func);
         exit(EXIT_FAILURE);
     }
