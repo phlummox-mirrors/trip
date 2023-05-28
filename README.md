@@ -23,7 +23,7 @@ single `make` call:
 	$ make install
 
 Note that by default this will install `trip` and the `trip` man page
-under `~/.local`, so you should check if `~/.local/bin` is in you
+under `~/.local`, so you should check if `~/.local/bin` is in your
 `PATH`.  If you run the above command as the super user,
 
 	$ make
