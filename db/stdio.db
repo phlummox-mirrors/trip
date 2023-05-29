@@ -81,7 +81,7 @@ params	char **p, size_t *n, FILE *f
 return	ssize_t
 
 errno	EINTR,EIO,ENOSPC,ENOMEM
-fail	-42
+fail	EOF
 name	puts
 params	const char *s
 return	int
