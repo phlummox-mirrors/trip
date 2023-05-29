@@ -303,7 +303,7 @@ derrno(char *name)
         errno = 0;
         val = strtol(line, &end, 10);
         if (!('\0' == *end || '\n' == *end) || 0 != errno) {
-            fprintf(stderr, "Expected a number \"%s\" (for %s)\n", line,
+            dprintf(STDERR_FILENO, "Expected a number \"%s\" (for %s)\n", line,
                     name);
             exit(EXIT_FAILURE);
         }
@@ -322,7 +322,7 @@ derrno(char *name)
     }
 
     if (0 > val) {
-        fprintf(stderr, "Failed to resolve %s\n", line);
+        dprintf(STDERR_FILENO, "Failed to resolve %s\n", line);
         exit(EXIT_FAILURE);
     }
 
@@ -336,7 +336,7 @@ enter(char *entry)
     char *func, *chance, *error;
     func = strtok(entry, DELIM);
     if (check(func) == NULL) {
-        fprintf(stderr, "Unknown function \"%s\", cannot trip\n", func);
+        dprintf(STDERR_FILENO, "Unknown function \"%s\", cannot trip\n", func);
         exit(EXIT_FAILURE);
     }
 
@@ -361,20 +361,20 @@ enter(char *entry)
     if (NULL != chance) {
         num = strtod(chance, &end);
         if (*end != '\0' || (num == 0 && errno != 0)) {
-            fprintf(stderr, "Cannot parse chance \"%s\"\n", chance);
+            dprintf(STDERR_FILENO, "Cannot parse chance \"%s\"\n", chance);
             exit(EXIT_FAILURE);
         }
     }
 
     if (0 >= num) {
-        fprintf(stderr, "The chance %s (for %s) is not positive\n", chance,
+        dprintf(STDERR_FILENO, "The chance %s (for %s) is not positive\n", chance,
                 func);
         exit(EXIT_FAILURE);
     }
     if (1 >= num) {
         entries[count].chance = num;
     } else {
-        fprintf(stderr, "The chance %g (for %s) is greater than 1\n", num,
+        dprintf(STDERR_FILENO, "The chance %g (for %s) is greater than 1\n", num,
                 func);
         exit(EXIT_FAILURE);
     }
@@ -394,7 +394,7 @@ enter(char *entry)
                 break;
             }
         }
-        fprintf(stderr, "%s is not expected to return %s\n", func, error);
+        dprintf(STDERR_FILENO, "%s is not expected to return %s\n", func, error);
         exit(EXIT_FAILURE);
 
       found_it:
@@ -418,8 +418,8 @@ list()
 static void __attribute__((noreturn))
 usage(char *argv0)
 {
-    fprintf(stderr, USAGE, argv0);
-    fprintf(stderr, "Flags:\n"
+    dprintf(STDERR_FILENO, USAGE, argv0);
+    dprintf(STDERR_FILENO, "Flags:\n"
             "\t-m\tSpecify multiple functions to trip\n"
             "\t-l\tList all supported functions\n"
 #ifndef NDEBUG
@@ -438,7 +438,7 @@ main(int argc, char *argv[])
      * intended, we will call the right function instead. */
     char *conf = getenv(ENVCONFNAME);
     if (conf) {
-        fprintf(stderr, "Don't trip me\n");
+        dprintf(STDERR_FILENO, "Don't trip me\n");
         exit(EXIT_FAILURE);
     }
 
@@ -454,7 +454,7 @@ main(int argc, char *argv[])
         case 'l':
             list();
         case 'V':
-            fprintf(stderr, "trip (Version %s)\n", VERSION);
+            dprintf(STDERR_FILENO, "trip (Version %s)\n", VERSION);
             exit(EXIT_SUCCESS);
 #ifndef NDEBUG
         case 'd':
@@ -477,7 +477,7 @@ main(int argc, char *argv[])
             optind++;
         }
 	if (argc <= optind) {
-            fprintf(stderr, "Unterminated list of functions\n");
+            dprintf(STDERR_FILENO, "Unterminated list of functions\n");
             exit(EXIT_FAILURE);
 	}
         optind++;
