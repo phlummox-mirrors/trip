@@ -386,8 +386,8 @@ enter(char *entry)
         entries[count].error = derrno(error);
         for (unsigned i = 0; i < LENGTH(names); ++i) {
             if (!strcmp(names[i].name, func)) {
-                for (unsigned j = 0; i < LENGTH(names[j].errs); ++i) {
-                    if (names[j].errs[j] == entries[count].error) {
+                for (unsigned j = 0; j < LENGTH(names[i].errs); ++j) {
+                    if (names[i].errs[j] == entries[count].error) {
                         goto found_it;
                     }
                 }
