@@ -36,7 +36,7 @@
 
 #define GS "\035"           /* group separator */
 #define RS "\036"           /* record separator */
-#define DELIM ":/,"  /* delimiters in the skip configuration */
+#define DELIM ":/,"         /* delimiters in the skip configuration */
 
 /* Parsed configuration */
 static unsigned count = 0;
@@ -67,7 +67,6 @@ static struct {
 #define debug(...) (void) 0
 #else
 
-
 static void
 _debug(char *words[], unsigned n)
 {
@@ -83,8 +82,8 @@ _debug(char *words[], unsigned n)
     real_write(STDERR_FILENO, prefix, strlen(prefix));
 
     for (unsigned i = 0; i < n; ++i) {
-         real_write(STDERR_FILENO, " ", 1);
-         real_write(STDERR_FILENO, words[i], strlen(words[i]));
+        real_write(STDERR_FILENO, " ", 1);
+        real_write(STDERR_FILENO, words[i], strlen(words[i]));
     }
     real_write(STDERR_FILENO, "\n", 1);
 }
@@ -145,12 +144,12 @@ init()
 
         struct entry *e = &entries[count];
         *e = (struct entry) { .name = strtok_r(tok, GS, &s2) };
-        assert(NULL != e->name);	/* otherwise we wouldn't be here */
+        assert(NULL != e->name); /* otherwise we wouldn't be here */
 
 	char *dup;
 	if ((dup = check(e->name)) == NULL) {
-	  debug("unknown function", e->name);
-	  continue;
+            debug("unknown function", e->name);
+            continue;
 	}
         debug("registering", e->name);
 	e->name = dup;
@@ -499,10 +498,10 @@ main(int argc, char *argv[])
     }
     strcpy(conf, ENVCONFNAME "=");
     if (debug_mode) {
-         strcat(conf, "D");
-         /* we have allocated a byte more than indicated in size, for
-          * this debugging indicator */
-         size++;
+        strcat(conf, "D");
+        /* we have allocated a byte more than indicated in size, for
+         * this debugging indicator */
+        size++;
     }
 
     for (unsigned i = 0; i < count; ++i) {
