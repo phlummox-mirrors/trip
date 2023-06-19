@@ -1,0 +1,9 @@
+# Function data for string.h			-*- mode: conf-space -*-
+
+: #include <string.h>
+
+errno	ENOMEM
+fail	NULL
+name	strdup
+params	const char *s
+return	char *
