@@ -52,7 +52,7 @@ $(GENSRC): %.c: %.db gen.awk Makefile
 .PHONY: install
 install: all
 	install -Dpm 755 trip $(PREFIX)/bin
-	install -Dpm 644 trip.1 $(PREFIX)/share/man/man/1
+	install -Dpm 644 trip.1 $(PREFIX)/share/man/man1
 
 .PHONY: uninstall
 uninstall:
