@@ -59,6 +59,9 @@ uninstall:
 	$(RM) $(PREFIX)/bin/trip
 	$(RM) $(PREFIX)/share/man/man1/trip.1
 
+TAGS: trip.c trip.h macs.h
+	etags $^
+
 .PHONY: clean
 clean:
 	$(RM) $(GENSRC) $(OBJ) fix-pie trip
