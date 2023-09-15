@@ -55,69 +55,69 @@ int
 main(int argc, char *argv[])
 {
     struct stat stat;
-    Elf64_Ehdr *ehdr;		/* ELF header */
-    Elf64_Shdr *shdr;		/* section header */
-    Elf64_Dyn *dyn;		/* "dynamic" section */
+    Elf64_Ehdr *ehdr;           /* ELF header */
+    Elf64_Shdr *shdr;           /* section header */
+    Elf64_Dyn *dyn;             /* "dynamic" section */
     int fd, i, j;
     char *mem;
 
     if (argc != 2) {
-	fprintf(stderr, "Usage: %s <executable-elf64-file>\n", argv[0]);
-	return EXIT_FAILURE;
+        fprintf(stderr, "Usage: %s <executable-elf64-file>\n", argv[0]);
+        return EXIT_FAILURE;
     }
 
     if (-1 == (fd = open(argv[1], O_RDWR))) {
-	perror("open");
-	return EXIT_FAILURE;
+        perror("open");
+        return EXIT_FAILURE;
     }
     if (-1 == fstat(fd, &stat)) {
-	perror("fstat");
-	close(fd);
-	return EXIT_FAILURE;
+        perror("fstat");
+        close(fd);
+        return EXIT_FAILURE;
     }
 
     mem = mmap(NULL, stat.st_size, PROT_READ | PROT_WRITE, MAP_SHARED, fd, 0);
     if (MAP_FAILED == mem) {
-	perror("mmap");
-	return EXIT_FAILURE;
+        perror("mmap");
+        return EXIT_FAILURE;
     }
     ehdr = (Elf64_Ehdr *) mem;
 
     /* Check if we actually have an ELF file. */
     if (0 != strncmp((char *) ehdr->e_ident, ELFMAG, SELFMAG)) {
-	fprintf(stderr, "Not a valid ELF file (%s)\n", ehdr->e_ident);
-	return EXIT_FAILURE;
+        fprintf(stderr, "Not a valid ELF file (%s)\n", ehdr->e_ident);
+        return EXIT_FAILURE;
     }
 
     /* Attempt to locate "dynamic" section by iterating through the
      * section indicated in the ELF header. */
     /* shdr = (Elf64_Shdr *)(mem + ehdr->e_shoff); */
     for (i = 0; i < ehdr->e_shnum; ++i) {
-	shdr = (Elf64_Shdr *) (mem + ehdr->e_shoff + i * ehdr->e_shentsize);
-	if (shdr->sh_type != SHT_DYNAMIC) {
-	    continue;		/* we are looking for the "dynamic" section */
-	}
+        shdr = (Elf64_Shdr *) (mem + ehdr->e_shoff + i * ehdr->e_shentsize);
+        if (shdr->sh_type != SHT_DYNAMIC) {
+            continue;           /* we are looking for the "dynamic" section */
+        }
 
 #define GETDYN(n) (Elf64_Dyn *) (mem + shdr->sh_offset + n * sizeof(Elf64_Dyn))
 
-	/* Iterate through the section until we find the dynamic entry
-	 * with the "DT_FLAGS_1" tag.  This is where the PIE flag is
-	 * stored. */
-	for (j = 0; dyn = GETDYN(j), dyn->d_tag != 0; ++j) {
-	    if (dyn->d_tag == DT_FLAGS_1) {
-		if (!(dyn->d_un.d_val & DF_1_PIE)) {
-		    fprintf(stderr, "The PIE flag was not set.\n");
+        /* Iterate through the section until we find the dynamic entry
+         * with the "DT_FLAGS_1" tag.  This is where the PIE flag is
+         * stored. */
+        for (j = 0; dyn = GETDYN(j), dyn->d_tag != 0; ++j) {
+            if (dyn->d_tag == DT_FLAGS_1) {
+                if (!(dyn->d_un.d_val & DF_1_PIE)) {
+                    fprintf(stderr, "The PIE flag was not set.\n");
                     return EXIT_FAILURE;
-		} else {
-		    dyn->d_un.d_val &= ~DF_1_PIE;	/* clear the flag */
-		}
+                } else {
+                    dyn->d_un.d_val &= ~DF_1_PIE;       /* clear the flag */
+                }
 
-		if (close(fd)) {
-		    perror("close");
-		}
-		return EXIT_SUCCESS;	/* mors mihi lucrum */
-	    }
-	}
+                if (close(fd)) {
+                    perror("close");
+                }
+                return EXIT_SUCCESS;    /* mors mihi lucrum */
+            }
+        }
     }
 
     fprintf(stderr, "Failed to unset PIE flag.\n");
