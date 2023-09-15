@@ -146,13 +146,13 @@ init()
         *e = (struct entry) { .name = strtok_r(tok, GS, &s2) };
         assert(NULL != e->name); /* otherwise we wouldn't be here */
 
-	char *dup;
-	if ((dup = check(e->name)) == NULL) {
+        char *dup;
+        if ((dup = check(e->name)) == NULL) {
             debug("unknown function", e->name);
             continue;
-	}
+        }
         debug("registering", e->name);
-	e->name = dup;
+        e->name = dup;
 
         char *chance = strtok_r(NULL, GS, &s2);
         if (NULL == chance) {
@@ -475,10 +475,10 @@ main(int argc, char *argv[])
             enter(argv[optind]);
             optind++;
         }
-	if (argc <= optind) {
+        if (argc <= optind) {
             dprintf(STDERR_FILENO, "Unterminated list of functions\n");
             exit(EXIT_FAILURE);
-	}
+        }
         optind++;
     } else {
         enter(argv[optind]);
