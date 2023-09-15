@@ -55,7 +55,7 @@ static bool debug_mode = false;
 
 /* list of known commands */
 #define DEF(ret, name, params, args, fail, ...)	{ #name, { __VA_ARGS__ }},
-static struct {
+static struct entry_name {
     char *name;
     int errs[256/sizeof(int)-sizeof(char*)]; /* adjust if necessary */
 } names[] = {
@@ -97,14 +97,25 @@ _debug(char *words[], unsigned n)
 
 #endif
 
+/* Helper function for qsort and bsearch */
+static int
+compar_name(const void *a, const void *b)
+{
+    return strcmp((((struct entry_name *) a))->name,
+                  (((struct entry_name *) b))->name);
+}
+
 /* Check if a function is supported by trip */
 static char*
 check(const char *fn)
 {
-    for (unsigned i = 0; i < LENGTH(names); ++i)
-         if (!strcmp(names[i].name, fn))
-              return names[i].name;
-    return NULL;
+    struct entry_name *entry =
+        bsearch(&((struct entry_name) { .name = (char * const) fn }),
+                names,
+                LENGTH(names),
+                sizeof(struct entry_name),
+                compar_name);
+    return entry != NULL ? entry->name : NULL;
 }
 
 /* Function to parse the configuration */
