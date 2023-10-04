@@ -36,7 +36,7 @@
 
 #define GS "\035"           /* group separator */
 #define RS "\036"           /* record separator */
-#define DELIM ":/,"         /* delimiters in the skip configuration */
+#define DELIM ":/"         /* delimiters in the skip configuration */
 
 /* Parsed configuration */
 static unsigned count = 0;
@@ -430,7 +430,6 @@ usage(char *argv0)
 {
     dprintf(STDERR_FILENO, USAGE, argv0);
     dprintf(STDERR_FILENO, "Flags:\n"
-            "\t-m\tSpecify multiple functions to trip\n"
             "\t-l\tList all supported functions\n"
 #ifndef NDEBUG
             "\t-d\tPrint debugging information\n"
@@ -455,12 +454,8 @@ main(int argc, char *argv[])
     /* Otherwise we are being invoked to wrap an actual call.  Let us *
      * start by parsing the command line. */
     int opt;
-    bool multi = false;
     while ((opt = getopt(argc, argv, "mlVdh")) != -1) {
         switch (opt) {
-        case 'm':
-            multi = true;
-            break;
         case 'l':
             list();
         case 'V':
@@ -481,20 +476,11 @@ main(int argc, char *argv[])
         usage(argv[0]);
     }
 
-    if (multi) {
-        while (optind < argc && !!strcmp(argv[optind], ".")) {
-            enter(argv[optind]);
-            optind++;
-        }
-        if (argc <= optind) {
-            dprintf(STDERR_FILENO, "Unterminated list of functions\n");
-            exit(EXIT_FAILURE);
-        }
-        optind++;
-    } else {
-        enter(argv[optind]);
-        optind++;
-    }
+    char *entry = NULL, *s;
+    entry = strtok_r(argv[optind++], ",", &s);
+    do {
+         enter(entry);
+    } while ((entry = strtok_r(NULL, ",", &s)));
 
     if (optind >= argc) {
         usage(argv[0]);
