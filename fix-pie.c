@@ -27,7 +27,7 @@
  *
  * Based on the following script:
  *
- *  https://gist.github.com/xieyubo/6820491646f9d01980a7eadb16564ddf.
+ *  https://gist.github.com/x-projs/6820491646f9d01980a7eadb16564ddf.
  *
  * This is necessary to address a behaviour change in
  * glibc>=2.30. dlopen() will fail if the file is position independent
