@@ -46,6 +46,9 @@ static struct entry {
     int error;
 } entries[1 << 8];
 
+/* are we currently operating as a dynamic library? */
+static bool is_lib = true;
+
 /* random number generator data */
 static unsigned long rng[56];
 
@@ -113,6 +116,8 @@ _debug(char *words[], unsigned n)
 static int
 compar_name(const void *a, const void *b)
 {
+    assert(is_lib);
+
     return strcmp((((struct entry_name *) a))->name,
                   (((struct entry_name *) b))->name);
 }
@@ -121,6 +126,8 @@ compar_name(const void *a, const void *b)
 static char*
 check(const char *fn)
 {
+    assert(is_lib);
+
     struct entry_name *entry =
         bsearch(&((struct entry_name) { .name = (char * const) fn }),
                 names,
@@ -134,6 +141,8 @@ check(const char *fn)
 static void
 init()
 {
+    if (!is_lib) return;
+
     static atomic_flag done = ATOMIC_FLAG_INIT;
     static volatile bool ready = false;
     if (true == atomic_flag_test_and_set(&done)) {
@@ -229,6 +238,7 @@ init()
 static unsigned long
 next()                          /* ... "random" number */
 {
+    assert(is_lib);
     static size_t i = 0;
     unsigned long r =
         rng[(i - 24) % LENGTH(rng)] + rng[(i - 55) % LENGTH(rng)];
@@ -238,6 +248,7 @@ next()                          /* ... "random" number */
 static double
 chance()
 {
+    assert(is_lib);
     return ((double) next()) / ((double) ULONG_MAX);
 }
 
@@ -289,6 +300,8 @@ ____trip_should_fail(char *name, int errv[], size_t errn)
 static int
 derrno(char *name)
 {
+    assert(!is_lib);
+
     char cmd[100];
     /* From popen(3): "Since a pipe is by definition unidirectional,
      * the type argument may specify only reading or writing, not
@@ -355,6 +368,8 @@ derrno(char *name)
 static void
 enter(char *entry)
 {
+    assert(!is_lib);
+
     char *func, *chance, *error;
     func = strtok(entry, DELIM);
     if (check(func) == NULL) {
@@ -430,6 +445,8 @@ enter(char *entry)
 static void __attribute__((noreturn))
 list()
 {
+    assert(!is_lib);
+
     for (unsigned i = 0; i < LENGTH(names); ++i) {
         puts(names[i].name);
     }
@@ -440,6 +457,8 @@ list()
 static void __attribute__((noreturn))
 usage(char *argv0)
 {
+    assert(!is_lib);
+
     dprintf(STDERR_FILENO, USAGE, argv0);
     dprintf(STDERR_FILENO, "Flags:\n"
             "\t-l\tList all supported functions\n"
@@ -454,6 +473,8 @@ usage(char *argv0)
 int __attribute__((weak))
 main(int argc, char *argv[])
 {
+    is_lib = false;
+
     /* If the environmental variable is set, we are currently being
      * invoked instead of the actual main function.  As this is not
      * intended, we will call the right function instead. */
