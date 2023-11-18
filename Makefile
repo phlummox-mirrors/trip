@@ -15,7 +15,7 @@
 # <https://www.gnu.org/licenses/>.
 
 # Optional: CPPFLAGS = -DNDEBUG
-CFLAGS   = -std=c11 -Wall -Wextra -O2 -pipe
+CFLAGS   = -std=c11 -Wall -Wextra -Wformat=2 -Wuninitialized -Warray-bounds -Os -pipe
 LDFLAGS  = -ldl -flto
 
 ifeq ($(shell id -u), 0)
