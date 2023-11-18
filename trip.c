@@ -15,7 +15,6 @@
 #define _GNU_SOURCE
 #define _FORTIFY_SOURCE 2
 
-#include <assert.h>
 #include <ctype.h>
 #include <dlfcn.h>
 #include <errno.h>
@@ -64,8 +63,21 @@ static struct entry_name {
 #undef DEF
 
 #ifdef NDEBUG
+#define assert(_)  (void) 0
 #define debug(...) (void) 0
 #else
+
+static void _debug(char *words[], unsigned n);
+
+#define assert(val)                             \
+    do {                                        \
+        if (!(val)) {                           \
+            _debug((char*[]){                   \
+                "Assertion failed", #val        \
+                }, 1);                          \
+            abort();                            \
+        }                                       \
+    } while (0)
 
 static void
 _debug(char *words[], unsigned n)
