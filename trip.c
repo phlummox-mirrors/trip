@@ -531,26 +531,25 @@ main(int argc, char *argv[])
     }
 
     for (unsigned i = 0; i < count; ++i) {
-        for (size_t n = 1024;; n <<= 1) {
-            char ent[n];
-            if (n == (size_t) snprintf(ent, sizeof(ent),
-                                       "%s" GS "%a" GS "%x" RS,
-                                       entries[i].name, entries[i].chance,
-                                       entries[i].error)) {
-                continue;	/* we need more memory */
-            }
+        int n = snprintf(NULL, 0, "%s" GS "%a" GS "%x" RS,
+                         entries[i].name, entries[i].chance,
+                         entries[i].error);
+        char ent[n + 1];
+        snprintf(ent, sizeof(ent),
+                 "%s" GS "%a" GS "%x" RS,
+                 entries[i].name, entries[i].chance,
+                 entries[i].error);
 
-            size += 1 + strlen(ent) + 1;
-            conf = realloc(conf, size);
-            if (!conf) {
-                perror("realloc");
-                exit(EXIT_FAILURE);
-            }
-
-            strcat(conf, ent);
-
-            break;
+        size += 1 + strlen(ent) + 1;
+        conf = realloc(conf, size);
+        if (!conf) {
+            perror("realloc");
+            exit(EXIT_FAILURE);
         }
+
+        strcat(conf, ent);
+
+        break;
     }
 
     /* Get path to the shared library */
