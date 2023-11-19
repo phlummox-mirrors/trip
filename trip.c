@@ -116,8 +116,6 @@ _debug(char *words[], unsigned n)
 static int
 compar_name(const void *a, const void *b)
 {
-    assert(is_lib);
-
     return strcmp((((struct entry_name *) a))->name,
                   (((struct entry_name *) b))->name);
 }
@@ -126,8 +124,6 @@ compar_name(const void *a, const void *b)
 static char*
 check(const char *fn)
 {
-    assert(is_lib);
-
     struct entry_name *entry =
         bsearch(&((struct entry_name) { .name = (char * const) fn }),
                 names,
