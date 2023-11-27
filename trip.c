@@ -65,6 +65,15 @@ static struct entry_name {
 };
 #undef DEF
 
+/* Declare and format a string on the stack.
+ *
+ * Watch out, this macro is not really hygienic, as it declares a
+ * variable and cannot be intuitively composed with any
+ * control-structures.  It should therefore be used with caution. */
+#define $sprintf(buf, fmt, ...)\
+    char buf[snprintf(NULL, 0, fmt, __VA_ARGS__) + 1];\
+    snprintf(buf, sizeof(buf), fmt, __VA_ARGS__)      \
+
 #ifdef NDEBUG
 #define assert(_)  (void) 0
 #define debug(...) (void) 0
@@ -75,8 +84,7 @@ static void _debug(char *words[], unsigned n);
 static void
 do_assert(char *val, unsigned linenr)
 {
-    char line[snprintf(NULL, 0, "(%s:%d)", __FILE__, linenr) + 1];
-    sprintf(line, "(%s:%d)", __FILE__, linenr);
+    $sprintf(line, "(%s:%d)", __FILE__, linenr);
     _debug((char*[]){"Assertion failed", val, line}, 3);
     abort();
 }
@@ -304,7 +312,6 @@ derrno(char *name)
 {
     assert(!is_lib);
 
-    char cmd[100];
     /* From popen(3): "Since a pipe is by definition unidirectional,
      * the type argument may specify only reading or writing, not
      * both; the re- sulting stream is correspondingly read-only or
@@ -313,7 +320,7 @@ derrno(char *name)
      * For this reason we prepare a command that will pope the symbol
      * we want to resolve when invoking the command, so that we can
      * read the macro-expansion. */
-    snprintf(cmd, sizeof(cmd), "echo \"%s\" | cpp -include errno.h", name);
+    $sprintf(cmd, "echo \"%s\" | cpp -include errno.h", name);
     FILE *cpp = popen(cmd, "r");
     if (NULL == cpp) {
         perror("popen");
@@ -537,12 +544,7 @@ main(int argc, char *argv[])
     }
 
     for (unsigned i = 0; i < count; ++i) {
-        int n = snprintf(NULL, 0, "%s" GS "%a" GS "%x" RS,
-                         entries[i].name, entries[i].chance,
-                         entries[i].error);
-        char ent[n + 1];
-        snprintf(ent, sizeof(ent),
-                 "%s" GS "%a" GS "%x" RS,
+        $sprintf(ent, "%s" GS "%a" GS "%x" RS,
                  entries[i].name, entries[i].chance,
                  entries[i].error);
 
