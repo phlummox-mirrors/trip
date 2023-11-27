@@ -486,7 +486,7 @@ main(int argc, char *argv[])
 
     /* If the environmental variable is set, we are currently being
      * invoked instead of the actual main function.  As this is not
-     * intended, we will call the right function instead. */
+     * intended, we abort execution immediately. */
     char *conf = getenv(ENVCONFNAME);
     if (conf) {
         dprintf(STDERR_FILENO, "Don't trip me\n");
