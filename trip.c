@@ -72,13 +72,19 @@ static struct entry_name {
 
 static void _debug(char *words[], unsigned n);
 
+static void
+do_assert(char *val, unsigned linenr)
+{
+    char line[snprintf(NULL, 0, "(%s:%d)", __FILE__, linenr) + 1];
+    sprintf(line, "(%s:%d)", __FILE__, linenr);
+    _debug((char*[]){"Assertion failed", val, line}, 3);
+    abort();
+}
+
 #define assert(val)                             \
     do {                                        \
         if (!(val)) {                           \
-            _debug((char*[]){                   \
-                "Assertion failed", #val        \
-                }, 1);                          \
-            abort();                            \
+            do_assert(#val, __LINE__);          \
         }                                       \
     } while (0)
 
