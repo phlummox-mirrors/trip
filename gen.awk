@@ -51,12 +51,12 @@ function gen() {
     }
     seen[data["name"]] = 1;
 
-    print                                               \
-        "DEF(" data["return"] ",",                      \
-        data["name"] ",",                               \
-        "(" data["params"] "),",                        \
-        "(" args "),",                                  \
-        "(" data["fail"] "),",				\
+    print                          \
+        "DEF(" data["return"] ",", \
+        data["name"] ",",          \
+        "(" data["params"] "),",   \
+        "(" args "),",             \
+        "(" data["fail"] "),",     \
         data["errno"] ")"
     delete data;
 }
