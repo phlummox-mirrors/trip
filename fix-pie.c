@@ -58,7 +58,8 @@ main(int argc, char *argv[])
     Elf64_Ehdr *ehdr;           /* ELF header */
     Elf64_Shdr *shdr;           /* section header */
     Elf64_Dyn *dyn;             /* "dynamic" section */
-    int fd, i, j;
+    int fd;
+    unsigned i, j;
     char *mem;
 
     if (argc != 2) {
@@ -76,7 +77,7 @@ main(int argc, char *argv[])
         return EXIT_FAILURE;
     }
 
-    mem = mmap(NULL, stat.st_size, PROT_READ | PROT_WRITE, MAP_SHARED, fd, 0);
+    mem = mmap(NULL, (size_t) stat.st_size, PROT_READ | PROT_WRITE, MAP_SHARED, fd, 0);
     if (MAP_FAILED == mem) {
         perror("mmap");
         return EXIT_FAILURE;
@@ -108,8 +109,8 @@ main(int argc, char *argv[])
                 if (!(dyn->d_un.d_val & DF_1_PIE)) {
                     fprintf(stderr, "The PIE flag was not set.\n");
                     return EXIT_FAILURE;
-                } else {
-                    dyn->d_un.d_val &= ~DF_1_PIE;       /* clear the flag */
+                } else {        /* clear the flag */
+                    dyn->d_un.d_val &= ~((Elf64_Xword) DF_1_PIE);
                 }
 
                 if (close(fd)) {

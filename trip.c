@@ -135,7 +135,7 @@ compar_name(const void *a, const void *b)
 }
 
 /* Check if a function is supported by trip */
-static char*
+static char* __attribute__((pure))
 check(const char *fn)
 {
     struct entry_name *entry =
@@ -149,7 +149,7 @@ check(const char *fn)
 
 /* Function to parse the configuration */
 static void
-init()
+init(void)
 {
     if (!is_lib) return;
 
@@ -220,7 +220,7 @@ init()
         }
 
         errno = 0;
-        e->error = strtol(code, &end, 16);
+        e->error = (int) strtol(code, &end, 16);
         if (*end != '\0' || errno != 0) {
             dprintf(STDERR_FILENO, "Malformed trip error code \"%s\"\n", code);
             abort();
@@ -252,7 +252,7 @@ init()
 }
 
 static unsigned long
-next()                          /* ... "random" number */
+next(void)                          /* ... "random" number */
 {
     assert(is_lib);
     static size_t i = 0;
@@ -262,7 +262,7 @@ next()                          /* ... "random" number */
 }
 
 static double
-chance()
+chance(void)
 {
     assert(is_lib);
     return ((double) next()) / ((double) ULONG_MAX);
@@ -334,7 +334,7 @@ derrno(char *name)
     }
 
     char line[1024];
-    int val = -1;
+    long val = -1;
     while ((fgets(line, sizeof(line), cpp)) != NULL) {
         if (sizeof(line) - 1 == strlen(line)
             && line[sizeof(line) - 2] != '\n') {
@@ -376,7 +376,7 @@ derrno(char *name)
         exit(EXIT_FAILURE);
     }
 
-    return val;
+    return (int) val;
 }
 
 /* Parse and add an ENTRY to the table entries. */
@@ -433,7 +433,7 @@ enter(char *entry)
 
     if (NULL != error) {
         for (unsigned i = 0; i < strlen(error); ++i) {
-            error[i] = toupper(error[i]);
+             error[i] = (char) toupper(error[i]);
         }
         entries[count].error = derrno(error);
         for (unsigned i = 0; i < LENGTH(names); ++i) {
@@ -458,7 +458,7 @@ enter(char *entry)
 
 /* List all supported functions */
 static void __attribute__((noreturn))
-list()
+list(void)
 {
     assert(!is_lib);
 
@@ -571,14 +571,14 @@ main(int argc, char *argv[])
 
 #ifdef __linux__
     strcpy(preload, "LD_PRELOAD=");
-    unsigned prefix = strlen(preload);
-    int ret = readlink("/proc/self/exe", preload + prefix,
+    size_t prefix = strlen(preload);
+    ssize_t ret = readlink("/proc/self/exe", preload + prefix,
                        sizeof(preload) - prefix);
     if (1 == -ret) {
         perror("readlink");
         exit(EXIT_FAILURE);
     }
-    preload[prefix + ret] = '\0';
+    preload[(ssize_t)prefix + ret] = '\0';
 #else
 #error "System is not supported"
 #endif

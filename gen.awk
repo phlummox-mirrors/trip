@@ -54,7 +54,9 @@ function gen() {
     print                          \
         "DEF(" data["return"] ",", \
         data["name"] ",",          \
-        "(" data["params"] "),",   \
+        "(" (data["params"]        \
+             ? data["params"]      \
+             : "void") "),",       \
         "(" args "),",             \
         "(" data["fail"] "),",     \
         data["errno"] ")"
