@@ -24,7 +24,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <time.h>
+#include <sys/time.h>
 #include <unistd.h>
 
 #include "trip.h"
@@ -234,8 +234,14 @@ init()
      * custom one so as to not interfere with rand from the standard
      * library. */
     unsigned i = 0;
-    pid_t p = getpid();
-    time_t t = time(NULL);
+    unsigned long p = (unsigned long) (getpid() + getppid());
+    unsigned long t;
+    struct timeval tv;
+    if (0 == gettimeofday(&tv, NULL)) {
+         t = (unsigned long) (tv.tv_usec + tv.tv_sec);
+    } else {
+         t = 1;
+    }
     rng[i] = p / t + t / p + t + p + t * p;
     for (i = 1; i < LENGTH(rng); ++i) {
         rng[i] = rng[i - 1] * p + t;
