@@ -8,6 +8,12 @@ name	unlink
 params	const char *pathname
 return	int
 
+errno	EACCES,EBUSY,EFAULT,EIO,EISDIR,ELOOP,ENAMETOOLONG,ENOENT,ENOMEM,ENOTDIR,EPERM
+fail	-1
+name	unlinkat
+params	int dirfd, const char *pathname, int flags
+return	int
+
 errno	EACCES,ELOOP,ENAMETOOLONG,ENOENT,ENOTDIR,EROFS,EFAULT,EIO,ENOMEM
 fail	-1
 name	access
