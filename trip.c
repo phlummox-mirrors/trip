@@ -147,6 +147,23 @@ check(const char *fn)
     return entry != NULL ? entry->name : NULL;
 }
 
+static unsigned long
+next(void)                          /* ... "random" number */
+{
+    assert(is_lib);
+    static size_t i = 0;
+    unsigned long r =
+        rng[(i - 24) % LENGTH(rng)] + rng[(i - 55) % LENGTH(rng)];
+    return rng[i++ % LENGTH(rng)] = r;
+}
+
+static double
+chance(void)
+{
+    assert(is_lib);
+    return ((double) next()) / ((double) ULONG_MAX);
+}
+
 /* Function to parse the configuration */
 static void
 init(void)
@@ -247,25 +264,12 @@ init(void)
         rng[i] = rng[i - 1] * p + t;
     }
 
+    unsigned long n = next();
+    $sprintf(sn, "%lu", n);
+    debug("initial PRNG", sn);
+
     debug("initialised");
     ready = !ready;             /* spin-un-lock */
-}
-
-static unsigned long
-next(void)                          /* ... "random" number */
-{
-    assert(is_lib);
-    static size_t i = 0;
-    unsigned long r =
-        rng[(i - 24) % LENGTH(rng)] + rng[(i - 55) % LENGTH(rng)];
-    return rng[i++ % LENGTH(rng)] = r;
-}
-
-static double
-chance(void)
-{
-    assert(is_lib);
-    return ((double) next()) / ((double) ULONG_MAX);
 }
 
 /* Failure predicate called by the trip stubs. */
