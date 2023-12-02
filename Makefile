@@ -40,11 +40,10 @@ trip: $(OBJ) fix-pie
 	$(CC) -o $@ $(filter %.o, $^) $(LDFLAGS)
 	./fix-pie $@
 
-trip.o: $(GENSRC) Makefile
 # See trip.c:/list of known commands/.  We collect and pipe all
 # definitions into trip.c to generate a table of defined commands.
 trip.o: CC := grep -h '^DEF' $(GENSRC) | sort -k2 | $(CC)
-$(OBJ): macs.h trip.h
+$(OBJ): Makefile macs.h trip.h
 
 $(GENSRC): %.c: %.db gen.awk Makefile
 	$(AWK) -f gen.awk $< > $@
