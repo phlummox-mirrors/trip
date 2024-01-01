@@ -1,4 +1,4 @@
-/* Copyright 2020-2023 Philip Kaludercic
+/* Copyright 2020-2024 Philip Kaludercic
  *
  * This program is free software: you can redistribute it and/or
  * modify it under the terms of the GNU General Public License as
@@ -539,36 +539,28 @@ main(int argc, char *argv[])
     }
 
     /* Construct configuration */
-    size_t size = strlen(ENVCONFNAME) + 1 + 1;
-    conf = malloc(size + 1);
-    if (NULL == conf) {
-        perror("malloc");
+    conf = NULL;
+    size_t size = 0;
+    FILE *h = open_memstream(&conf, &size);
+    if (0 > fprintf(h, "%s=", ENVCONFNAME)) {
+        perror("printf");
         exit(EXIT_FAILURE);
     }
-    strcpy(conf, ENVCONFNAME "=");
     if (debug_mode) {
-        strcat(conf, "D");
-        /* we have allocated a byte more than indicated in size, for
-         * this debugging indicator */
-        size++;
-    }
-
-    for (unsigned i = 0; i < count; ++i) {
-        $sprintf(ent, "%s" GS "%a" GS "%x" RS,
-                 entries[i].name, entries[i].chance,
-                 entries[i].error);
-
-        size += 1 + strlen(ent) + 1;
-        conf = realloc(conf, size);
-        if (!conf) {
-            perror("realloc");
+        if (EOF == putc('D', h)) {
+            perror("putc");
             exit(EXIT_FAILURE);
         }
-
-        strcat(conf, ent);
-
-        break;
     }
+    for (unsigned i = 0; i < count; ++i) {
+        if (0 > fprintf(h, "%s" GS "%a" GS "%x" RS,
+                        entries[i].name, entries[i].chance,
+                        entries[i].error)) {
+            perror("printf");
+            exit(EXIT_FAILURE);
+        }
+    }
+    fclose(h);
 
     /* Get path to the shared library */
     char preload[1 << 12];
