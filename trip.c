@@ -75,7 +75,7 @@ static struct entry_name {
     snprintf(buf, sizeof(buf), fmt, __VA_ARGS__)      \
 
 #ifdef NDEBUG
-#define assert(_)  (void) 0
+#define assert(_)  do { (void) 0; } while (0)
 #define debug(...) (void) 0
 #else
 
