@@ -38,14 +38,17 @@ you can always override the `PREFIX` macro while invoking make:
 Development
 -----------
 
-Trip is currently developed on [a GitLab instance], but I am fine with
-accepting [patches] sent directly to [me] via Email.  Keep in mind that
-the program is currently still experimental and does not always behave
-the way it should.  If you experience any such difficulties, do not
-hesitate to reach out so to solve the problem.
+Trip is currently developed on [a GitLab instance] and mirrored on
+[Codeberg], but I am fine with accepting [patches] sent directly to
+[me] via Email.  Keep in mind that the program is currently still
+experimental and does not always behave the way it should.  If you
+experience any such difficulties, do not hesitate to reach out so to
+solve the problem.
 
 [a GitLab instance]:
 	https://gitlab.cs.fau.de/oj14ozun/trip/
+[Codeberg]:
+	https://codeberg.org/pkal/trip
 [patches]:
 	https://git-send-email.io/
 [me]:
