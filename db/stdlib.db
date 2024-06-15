@@ -20,3 +20,8 @@ name	realloc
 params	void *ptr, size_t size
 return	void*
 
+errno	EEXIST
+fail	-1
+name	mkstemp
+params	char *template
+return	int
