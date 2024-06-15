@@ -15,8 +15,21 @@
 # <https://www.gnu.org/licenses/>.
 
 # Optional: CPPFLAGS = -DNDEBUG
-CFLAGS   = -std=c11 -Wall -Wextra -Wformat=2 -Wuninitialized -Warray-bounds -Os -pipe -fhardened
-LDFLAGS  = -ldl -fhardened
+CFLAGS   = -std=c11 -Wall -Wextra -Wformat=2 -Wuninitialized -Warray-bounds -Os -pipe
+LDFLAGS  = -ldl -flto
+
+ifeq ($(CC),gcc)
+ifeq (14,$(firstword $(sort $(shell $(CC) -dumpversion) 14)))
+CFLAGS  := $(CFLAGS) -fhardened
+LDFLAGS := $(LDFLAGS) -fhardened
+else
+CFLAGS  := $(CFLAGS) -fPIE -D_FORTIFY_SOURCE=2
+LDFLAGS := $(LDFLAGS) -pie
+endif
+else
+CFLAGS  := $(CFLAGS) -fPIE
+LDFLAGS := $(LDFLAGS) -pie
+endif
 
 ifeq ($(shell id -u), 0)
 PREFIX   = /usr/local
