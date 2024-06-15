@@ -133,3 +133,9 @@ fail	-1
 name	fchdir
 params	int fd
 return	int
+
+errno	EACCES,EBADF,EFAULT,EIO,ELOOP,ENAMETOOLONG,ENOENT,ENOMEM,ENOTDIR,EPERM,EROFS
+fail	-1
+name	fchown
+params	int fd, uid_t owner, gid_t group
+return	int
