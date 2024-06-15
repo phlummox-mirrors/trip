@@ -13,7 +13,6 @@
  */
 
 #define _GNU_SOURCE
-#define _FORTIFY_SOURCE 2
 
 #include <ctype.h>
 #include <dlfcn.h>
