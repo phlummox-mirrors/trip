@@ -345,7 +345,7 @@ derrno(char *name)
         return 0;
     }
 
-    char line[1024];
+    char line[BUFSIZ];
     long val = -1;
     while ((fgets(line, sizeof(line), cpp)) != NULL) {
         if (sizeof(line) - 1 == strlen(line)
