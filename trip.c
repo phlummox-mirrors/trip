@@ -587,9 +587,7 @@ main(int argc, char *argv[])
 #error "System is not supported"
 #endif
 
-    if (execvpe(argv[optind], argv + optind, (char*[]) {preload, conf, NULL})) {
-        perror("exec");
-        exit(EXIT_FAILURE);
-    }
-    return EXIT_SUCCESS;
+    execvpe(argv[optind], argv + optind, (char*[]) {preload, conf, NULL});
+    perror("exec");
+    exit(EXIT_FAILURE);
 }
