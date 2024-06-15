@@ -1,4 +1,4 @@
-# Copyright 2022, 2023 Philip Kaludercic
+# Copyright 2022, 2023, 2024 Philip Kaludercic
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -15,8 +15,8 @@
 # <https://www.gnu.org/licenses/>.
 
 # Optional: CPPFLAGS = -DNDEBUG
-CFLAGS   = -std=c11 -Wall -Wextra -Wformat=2 -Wuninitialized -Warray-bounds -Os -pipe
-LDFLAGS  = -ldl -flto
+CFLAGS   = -std=c11 -Wall -Wextra -Wformat=2 -Wuninitialized -Warray-bounds -Os -pipe -fPIE -g3
+LDFLAGS  = -ldl -flto -pie
 
 ifeq ($(shell id -u), 0)
 PREFIX   = /usr/local
