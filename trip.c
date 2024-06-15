@@ -76,6 +76,7 @@ static struct entry_name {
 #ifdef NDEBUG
 #define assert(_)  do { (void) 0; } while (0)
 #define debug(...) (void) 0
+#define debugf(...) (void) 0
 #else
 
 static void _debug(char *words[], unsigned n);
@@ -123,6 +124,10 @@ _debug(char *words[], unsigned n)
         char *words[] = { __VA_ARGS__ };        \
         _debug(words, LENGTH(words));           \
     } while (0)
+
+#define debugf(fmt, ...)                        \
+    do $sprintf(_, fmt, __VA_ARGS__) debug(_);  \
+    while (0)
 
 #endif
 
@@ -265,9 +270,7 @@ init(void)
     }
 
     unsigned long n = next();
-    $sprintf(sn, "%lu", n) {
-        debug("initial PRNG", sn);
-    }
+    debugf("initial PRNG state is %lu", n);
 
     debug("initialised");
     ready = !ready;             /* spin-un-lock */
