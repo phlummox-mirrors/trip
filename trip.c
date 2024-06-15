@@ -559,6 +559,11 @@ main(int argc, char *argv[])
     conf = NULL;
     size_t size = 0;
     FILE *h = open_memstream(&conf, &size);
+    if (NULL == h) {
+         perror("open_memstream");
+         exit(EXIT_FAILURE);
+    }
+
     if (0 > fprintf(h, "%s=", ENVCONFNAME)) {
         perror("printf");
         exit(EXIT_FAILURE);
