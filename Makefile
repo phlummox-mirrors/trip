@@ -16,7 +16,7 @@
 
 # Optional: CPPFLAGS = -DNDEBUG
 CFLAGS   = -std=c11 -Wall -Wextra -Wformat=2 -Wuninitialized -Warray-bounds -Os -pipe
-LDFLAGS  = -ldl -flto
+LDFLAGS  = -ldl
 
 ifeq ($(shell basename $$(realpath $$(which $(CC)))),gcc)
 ifeq (14,$(firstword $(sort $(shell $(CC) -dumpversion) 14)))
