@@ -26,6 +26,9 @@
 #include <sys/time.h>
 #include <unistd.h>
 
+#include <assert.h>
+#undef assert
+
 #include "trip.h"
 
 #define ENVCONFNAME "____TRIP_CONFIGURATION"
@@ -497,6 +500,8 @@ usage(char *argv0)
 int __attribute__((weak))
 main(int argc, char *argv[])
 {
+     _Static_assert(0 < LENGTH(names), "The names array is empty");
+
     is_lib = false;
 
     /* If the environmental variable is set, we are currently being
