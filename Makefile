@@ -79,4 +79,4 @@ TAGS: trip.c trip.h macs.h
 
 .PHONY: clean
 clean:
-	$(RM) $(GENSRC) $(OBJ) fix-pie trip TAGS
+	$(RM) $(GENSRC) $(OBJ) fix-pie fix-pie.o trip TAGS
