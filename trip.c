@@ -84,10 +84,10 @@ static void _debug(char *words[], unsigned n);
 static void
 do_assert(char *val, unsigned linenr)
 {
-     $sprintf(line, "(%s:%d)", __FILE__, linenr) {
-         _debug((char*[]){"Assertion failed", val, line}, 3);
-     }
-     abort();
+    $sprintf(line, "(%s:%d)", __FILE__, linenr) {
+        _debug((char*[]){"Assertion failed", val, line}, 3);
+    }
+    abort();
 }
 
 #define assert(val)                             \
@@ -260,9 +260,9 @@ init(void)
     unsigned long t;
     struct timeval tv;
     if (0 == gettimeofday(&tv, NULL)) {
-         t = (unsigned long) (tv.tv_usec + tv.tv_sec);
+        t = (unsigned long) (tv.tv_usec + tv.tv_sec);
     } else {
-         t = 1;
+        t = 1;
     }
     rng[i] = p / t + t / p + t + p + t * p;
     for (i = 1; i < LENGTH(rng); ++i) {
@@ -443,7 +443,7 @@ enter(char *entry)
 
     if (NULL != error) {
         for (unsigned i = 0; i < strlen(error); ++i) {
-             error[i] = (char) toupper(error[i]);
+            error[i] = (char) toupper(error[i]);
         }
         entries[count].error = derrno(error);
         for (unsigned i = 0; i < LENGTH(names); ++i) {
@@ -537,7 +537,7 @@ main(int argc, char *argv[])
     char *entry = NULL, *s;
     entry = strtok_r(argv[optind++], ",", &s);
     do {
-         enter(entry);
+        enter(entry);
     } while ((entry = strtok_r(NULL, ",", &s)));
 
     if (optind >= argc) {
