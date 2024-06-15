@@ -39,6 +39,9 @@
 #define RS "\036"           /* record separator */
 #define DELIM ":/"         /* delimiters in the skip configuration */
 
+#define GLUE(A, B) A ## B
+#define XGLUE(A, B) GLUE(A, B)
+
 /* Parsed configuration */
 static unsigned count = 0;
 static struct entry {
@@ -68,12 +71,14 @@ static struct entry_name {
 #undef DEF
 
 /* Declare and format a string on the stack. */
-#define $sprintf(buf, fmt, ...)                                 \
+#define _$sprintf(buf, c, fmt, ...)                             \
     for (char buf[snprintf(NULL, 0, fmt, __VA_ARGS__) + 1],     \
              c = !'\0';                                         \
          c != '\0' &&                                           \
              (snprintf(buf, sizeof(buf), fmt, __VA_ARGS__), 1); \
          c = '\0')
+#define $sprintf(buf, ...)                                 \
+     _$sprintf(buf, XGLUE(__c_, __COUNTER__), __VA_ARGS__)
 
 #ifdef NDEBUG
 #define assert(_)  do { (void) 0; } while (0)
