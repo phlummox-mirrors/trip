@@ -65,14 +65,13 @@ static struct entry_name {
 };
 #undef DEF
 
-/* Declare and format a string on the stack.
- *
- * Watch out, this macro is not really hygienic, as it declares a
- * variable and cannot be intuitively composed with any
- * control-structures.  It should therefore be used with caution. */
-#define $sprintf(buf, fmt, ...)\
-    char buf[snprintf(NULL, 0, fmt, __VA_ARGS__) + 1];\
-    snprintf(buf, sizeof(buf), fmt, __VA_ARGS__)      \
+/* Declare and format a string on the stack. */
+#define $sprintf(buf, fmt, ...)                                 \
+    for (char buf[snprintf(NULL, 0, fmt, __VA_ARGS__) + 1],     \
+             c = !'\0';                                         \
+         c != '\0' &&                                           \
+             (snprintf(buf, sizeof(buf), fmt, __VA_ARGS__), 1); \
+         c = '\0')
 
 #ifdef NDEBUG
 #define assert(_)  do { (void) 0; } while (0)
@@ -84,9 +83,10 @@ static void _debug(char *words[], unsigned n);
 static void
 do_assert(char *val, unsigned linenr)
 {
-    $sprintf(line, "(%s:%d)", __FILE__, linenr);
-    _debug((char*[]){"Assertion failed", val, line}, 3);
-    abort();
+     $sprintf(line, "(%s:%d)", __FILE__, linenr) {
+         _debug((char*[]){"Assertion failed", val, line}, 3);
+     }
+     abort();
 }
 
 #define assert(val)                             \
@@ -265,8 +265,9 @@ init(void)
     }
 
     unsigned long n = next();
-    $sprintf(sn, "%lu", n);
-    debug("initial PRNG", sn);
+    $sprintf(sn, "%lu", n) {
+        debug("initial PRNG", sn);
+    }
 
     debug("initialised");
     ready = !ready;             /* spin-un-lock */
@@ -330,8 +331,10 @@ derrno(char *name)
      * For this reason we prepare a command that will pope the symbol
      * we want to resolve when invoking the command, so that we can
      * read the macro-expansion. */
-    $sprintf(cmd, "echo \"%s\" | cpp -include errno.h", name);
-    FILE *cpp = popen(cmd, "r");
+    FILE *cpp;
+    $sprintf(cmd, "echo \"%s\" | cpp -include errno.h", name) {
+        cpp = popen(cmd, "r");
+    }
     if (NULL == cpp) {
         perror("popen");
         return 0;
