@@ -56,7 +56,7 @@ trip: $(OBJ) fix-pie
 trip.o: $(GENSRC) Makefile
 # See trip.c:/list of known commands/.  We collect and pipe all
 # definitions into trip.c to generate a table of defined commands.
-trip.o: CC := grep -h '^DEF' $(GENSRC) | sort -k2 | $(CC)
+trip.o: CC := grep -h '^DEF' $(GENSRC) | sort -k2,2d -t, | $(CC)
 $(OBJ): Makefile macs.h
 macs.h: trip.h
 
