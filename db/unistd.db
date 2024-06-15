@@ -121,3 +121,9 @@ fail	-1
 name	write
 params	int fd, const void *m, size_t n
 return	ssize_t
+
+errno	EACCES,EBADF,EFAULT,EIO,ELOOP,ENOENT,ENOMEM,ENOTDIR,EPERM,EROFS,ETXTBSY
+fail	-1
+name	faccessat
+params	int dirfd, const char *pathname, int mode, int flags
+return	int
