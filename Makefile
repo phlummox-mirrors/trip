@@ -18,7 +18,7 @@
 CFLAGS   = -std=c11 -Wall -Wextra -Wformat=2 -Wuninitialized -Warray-bounds -Os -pipe
 LDFLAGS  = -ldl -flto
 
-ifeq ($(CC),gcc)
+ifeq ($(shell basename $$(realpath $$(which $(CC)))),gcc)
 ifeq (14,$(firstword $(sort $(shell $(CC) -dumpversion) 14)))
 CFLAGS  := $(CFLAGS) -fhardened
 LDFLAGS := $(LDFLAGS) -fhardened
