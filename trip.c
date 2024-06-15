@@ -399,6 +399,10 @@ enter(char *entry)
 
     char *func, *chance, *error;
     func = strtok(entry, DELIM);
+    if (!func) {
+        dprintf(STDERR_FILENO, "Must pass a non-empty function name\n");
+        exit(EXIT_FAILURE);
+    }
     if (check(func) == NULL) {
         dprintf(STDERR_FILENO, "Unknown function \"%s\", cannot trip\n", func);
         exit(EXIT_FAILURE);

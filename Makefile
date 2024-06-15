@@ -26,6 +26,7 @@ else
 CFLAGS  := $(CFLAGS) -fPIE -D_FORTIFY_SOURCE=2
 LDFLAGS := $(LDFLAGS) -pie
 endif
+CFLAGS  := $(CFLAGS) -fanalyzer
 else
 CFLAGS  := $(CFLAGS) -fPIE
 LDFLAGS := $(LDFLAGS) -pie
