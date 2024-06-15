@@ -518,11 +518,14 @@ main(int argc, char *argv[])
         case 'V':
             dprintf(STDERR_FILENO, "trip (Version %s)\n", VERSION);
             exit(EXIT_SUCCESS);
-#ifndef NDEBUG
         case 'd':
+#ifndef NDEBUG
             debug_mode = true;
-            break;
+#else
+            dprintf(STDERR_FILENO, "trip not build with debugging option\n");
+            exit(EXIT_FAILURE);
 #endif
+            break;
         case 'h':
         default:		/* '?' */
             usage(argv[0]);
