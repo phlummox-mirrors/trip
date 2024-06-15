@@ -569,7 +569,7 @@ main(int argc, char *argv[])
     strcpy(preload, "LD_PRELOAD=");
     size_t prefix = strlen(preload);
     ssize_t ret = readlink("/proc/self/exe", preload + prefix,
-                       sizeof(preload) - prefix);
+                           sizeof(preload) - prefix);
     if (1 == -ret) {
         perror("readlink");
         exit(EXIT_FAILURE);
