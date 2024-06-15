@@ -268,7 +268,7 @@ init(void)
         rng[i] = rng[i - 1] * p + t;
     }
 
-    unsigned long n = next();
+    unsigned long n = next(); (void) n;
     debugf("initial PRNG state is %lu", n);
 
     debug("initialised");
