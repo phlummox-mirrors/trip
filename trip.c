@@ -590,23 +590,35 @@ main(int argc, char *argv[])
     fclose(h);
 
     /* Get path to the shared library */
-    char preload[1 << 12];
+    for (size_t size = 1<<6; ; size += 1<<6) {
+         char preload[size];
+         debugf("resolving /proc/self/exe with %lu byte", size);
 
+         strncpy(preload, "LD_PRELOAD=", sizeof preload);
+         size_t prefix = strlen(preload);
 #ifdef __linux__
-    strcpy(preload, "LD_PRELOAD=");
-    size_t prefix = strlen(preload);
-    ssize_t ret = readlink("/proc/self/exe", preload + prefix,
-                           sizeof(preload) - prefix);
-    if (1 == -ret) {
-        perror("readlink");
-        exit(EXIT_FAILURE);
-    }
-    preload[(ssize_t)prefix + ret] = '\0';
+         ssize_t ret = readlink("/proc/self/exe", preload + prefix,
+                                sizeof preload - prefix);
+
+         assert(-1 <= ret);
+         if (-1 == ret) {
+              perror("readlink");
+              exit(EXIT_FAILURE);
+         }
+         if (sizeof preload - prefix == (size_t) ret) {
+              /* the memory automatically allocated in PRELOAD was not
+               * sufficient to store the resolved file name.  We will
+               * proceed to allocate more memory and and attempt
+               * resolving the symbolic link path again. */
+              continue;
+         }
+         preload[(ssize_t)prefix + ret] = '\0';
 #else
 #error "System is not supported"
 #endif
 
-    execvpe(argv[optind], argv + optind, (char*[]) {preload, conf, NULL});
-    perror("exec");
-    exit(EXIT_FAILURE);
+         execvpe(argv[optind], argv + optind, (char*[]) {preload, conf, NULL});
+         perror("exec");
+         exit(EXIT_FAILURE);
+    }
 }
