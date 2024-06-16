@@ -612,7 +612,7 @@ main(int argc, char *argv[])
                * resolving the symbolic link path again. */
               continue;
          }
-         preload[(ssize_t)prefix + ret] = '\0';
+         assert('\0' == preload[prefix + (size_t)ret]);
 #else
 #error "System is not supported"
 #endif
