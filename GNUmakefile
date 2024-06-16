@@ -47,6 +47,8 @@ OBJ      = $(patsubst %.db,%.o,$(DB)) trip.o
 AWK      = awk
 RM       = rm -f
 
+THISFILE = $(firstword $(MAKEFILE_LIST))
+
 .PHONY: all
 all: trip
 
@@ -54,15 +56,15 @@ trip: $(OBJ) fix-pie
 	$(CC) -o $@ $(filter %.o, $^) $(LDFLAGS)
 	./fix-pie $@
 
-trip.o: $(GENSRC) Makefile
+trip.o: $(GENSRC) $(THISFILE)
 # See trip.c:/list of known commands/.  We collect and pipe all
 # definitions into trip.c to generate a table of defined commands.
 trip.o: CC := grep -h '^DEF' $(GENSRC) | sort -k2,2d -t, | $(CC) \
 	      -DCOMPILER="\"$(shell $(CC) --version | sed 1q)\""
-$(OBJ): Makefile macs.h
+$(OBJ): $(THISFILE) macs.h
 macs.h: trip.h
 
-$(GENSRC): %.c: %.db gen.awk Makefile
+$(GENSRC): %.c: %.db gen.awk $(THISFILE)
 	$(AWK) -f gen.awk $< > $@
 
 .PHONY: install
