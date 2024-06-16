@@ -35,6 +35,10 @@
 #define VERSION "0.1.0"
 #define USAGE "Usage: %s [func[:chance[:errno]]] command args\n"
 
+#ifndef COMPILER
+#define COMPILER "unknown"
+#endif
+
 #define GS "\035"           /* group separator */
 #define RS "\036"           /* record separator */
 #define DELIM ":/"         /* delimiters in the skip configuration */
@@ -530,7 +534,10 @@ main(int argc, char *argv[])
         case 'l':
             list();
         case 'V':
-            dprintf(STDERR_FILENO, "trip (Version %s)\n", VERSION);
+            dprintf(STDOUT_FILENO,
+                    "version \t" VERSION "\n"
+                    "compiler\t" COMPILER "\n"
+                    "built   \t" __TIMESTAMP__ "\n") ;
             exit(EXIT_SUCCESS);
         case 'd':
 #ifndef NDEBUG
