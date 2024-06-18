@@ -71,6 +71,7 @@ $(GENSRC): %.c: %.db gen.awk $(THISFILE)
 install: all
 	install -Dpm 755 trip $(PREFIX)/bin
 	install -Dpm 644 trip.1 $(PREFIX)/share/man/man1
+	@./check.sh $(PREFIX)/bin
 
 .PHONY: uninstall
 uninstall:
