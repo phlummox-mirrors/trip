@@ -505,7 +505,7 @@ usage(char *argv0)
 #ifndef NDEBUG
             "\t-d\tPrint debugging information\n"
 #endif
-            "\t-V\tPrint version\n"
+            "\t-V\tPrint version and build information\n"
             "\t-h\tPrint this message\n");
     exit(EXIT_SUCCESS);
 }
