@@ -493,6 +493,26 @@ list(void)
     exit(EXIT_SUCCESS);
 }
 
+/* List all supported errno values for func. */
+static void __attribute__((noreturn))
+list_errors(const char func[static 1])
+{
+    if (check(func) == NULL) {
+        dprintf(STDERR_FILENO, "Unknown function \"%s\"\n", func);
+        exit(EXIT_FAILURE);
+    }
+
+    for (unsigned i = 0; i < LENGTH(names); ++i) {
+        if (!strcmp(names[i].name, func)) {
+            for (unsigned j = 0; names[i].errs[j]; ++j) {
+                puts(strerrorname_np(names[i].errs[j]));
+            }
+        }
+    }
+
+    exit(EXIT_SUCCESS);
+}
+
 /* Print a usage string and terminate */
 static void __attribute__((noreturn))
 usage(char *argv0)
@@ -502,6 +522,7 @@ usage(char *argv0)
     dprintf(STDERR_FILENO, USAGE, argv0);
     dprintf(STDERR_FILENO, "Flags:\n"
             "\t-l\tList all supported functions\n"
+            "\t-e FUNC\tList all errno values for FUNC\n"
 #ifndef NDEBUG
             "\t-d\tPrint debugging information\n"
 #endif
@@ -529,10 +550,12 @@ main(int argc, char *argv[])
     /* Otherwise we are being invoked to wrap an actual call.  Let us *
      * start by parsing the command line. */
     int opt;
-    while ((opt = getopt(argc, argv, "mlVdh")) != -1) {
+    while ((opt = getopt(argc, argv, "mle:Vdh")) != -1) {
         switch (opt) {
         case 'l':
             list();
+        case 'e':
+            list_errors(optarg);
         case 'V':
             dprintf(STDOUT_FILENO,
                     "version \t" VERSION "\n"
