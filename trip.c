@@ -398,7 +398,7 @@ enter(char *entry)
 
     if (NULL != error) {
         for (unsigned i = 0; i < strlen(error); ++i) {
-            error[i] = (char) toupper(error[i]);
+            error[i] = (char) toupper((unsigned char) error[i]);
         }
         for (unsigned i = 0; i < LENGTH(names); ++i) {
             if (!strcmp(names[i].name, func)) {
