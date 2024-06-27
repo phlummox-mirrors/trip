@@ -189,7 +189,7 @@ chance(void)
 static void
 init(void)
 {
-    if (!is_lib) return;
+    assert (is_lib);
 
     static atomic_flag done = ATOMIC_FLAG_INIT;
     static volatile bool ready = false;
@@ -297,6 +297,7 @@ bool
 ____trip_should_fail(char *name, int errv[], size_t errn)
 {
     unsigned i;
+    if (!is_lib) return false;
 
     /* Initialise failure data if necessary */
     init();
