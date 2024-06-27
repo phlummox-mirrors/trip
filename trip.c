@@ -462,7 +462,7 @@ check_exec(const char *exec)
     } else {
         PATH = getenv("PATH");
         if (NULL == PATH) {
-            fputs("no $PATH set\n", stderr);
+            dprintf(STDERR_FILENO, "no $PATH set\n");
             exit(EXIT_FAILURE);
         }
         PATH = strdup(PATH);      /* strtok is destructive */
@@ -483,7 +483,7 @@ check_exec(const char *exec)
             close(fd);
         }
         if (dir == NULL) {
-            fprintf(stderr, "failed to locate %s in $PATH\n", exec);
+            dprintf(STDERR_FILENO, "failed to locate %s in $PATH\n", exec);
             exit(EXIT_FAILURE);
         }
         free(PATH);
@@ -515,11 +515,11 @@ check_exec(const char *exec)
         exit(EXIT_FAILURE);
     }
     if (!WIFEXITED(status)) {
-        fputs("nm failed to terminate normally\n", stderr);
+        dprintf(STDERR_FILENO, "nm failed to terminate normally\n");
         exit(EXIT_FAILURE);
     }
     if (0 != WEXITSTATUS(status)) {
-        fprintf(stderr, "nm failed with status %d\n",
+        dprintf(STDOUT_FILENO, "nm failed with status %d\n",
                 WEXITSTATUS(status));
         exit(EXIT_FAILURE);
     }
