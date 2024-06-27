@@ -581,7 +581,7 @@ main(int argc, char *argv[])
     /* Otherwise we are being invoked to wrap an actual call.  Let us *
      * start by parsing the command line. */
     int opt;
-    while ((opt = getopt(argc, argv, "mlc:e:Vdh")) != -1) {
+    while ((opt = getopt(argc, argv, "dle:c:Vh")) != -1) {
         switch (opt) {
         case 'd':
 #ifndef NDEBUG
