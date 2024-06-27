@@ -85,12 +85,12 @@ static char *argv0;
 static void __attribute__((noreturn))
 fail(const char reason[static 1], const bool print_emsg)
 {
-     dprintf(STDERR_FILENO, "%s: %s%s%s\n",
-             argv0,
-             reason,
-             print_emsg ? ": ": "",
-             print_emsg ? strerror(errno) : "");
-     exit(EXIT_FAILURE);
+    dprintf(STDERR_FILENO, "%s: %s%s%s\n",
+            argv0,
+            reason,
+            print_emsg ? ": ": "",
+            print_emsg ? strerror(errno) : "");
+    exit(EXIT_FAILURE);
 }
 
 /* Declare and format a string on the stack. */
@@ -100,8 +100,8 @@ fail(const char reason[static 1], const bool print_emsg)
          c != '\0' &&                                           \
              (snprintf(buf, sizeof(buf), fmt, __VA_ARGS__), 1); \
          c = '\0')
-#define $sprintf(buf, ...)                                 \
-     _$sprintf(buf, XGLUE(__c_, __COUNTER__), __VA_ARGS__)
+#define $sprintf(buf, ...)                                      \
+    _$sprintf(buf, XGLUE(__c_, __COUNTER__), __VA_ARGS__)
 
 #define failf(fmt, ...)                                 \
     do $sprintf(_, fmt, __VA_ARGS__) fail(_, false);    \
@@ -555,7 +555,7 @@ usage(const char *argv0)
 int __attribute__((weak))
 main(int argc, char *argv[])
 {
-     _Static_assert(0 < LENGTH(names), "The names array is empty");
+    _Static_assert(0 < LENGTH(names), "The names array is empty");
 
     argv0 = argv[0];
     is_lib = false;
@@ -572,11 +572,11 @@ main(int argc, char *argv[])
     struct option {
         void (*fn)(const char *); char *arg;
     } options[1 << CHAR_BIT] = {
-        ['l'] = { list,          NULL    },
-        ['e'] = { list_errors,   NULL    },
-        ['c'] = { check_exec,    NULL    },
-        ['V'] = { version,       NULL    },
-        ['h'] = { usage,         argv[0] },
+    ['l'] = { list,          NULL    },
+    ['e'] = { list_errors,   NULL    },
+    ['c'] = { check_exec,    NULL    },
+    ['V'] = { version,       NULL    },
+    ['h'] = { usage,         argv[0] },
     };
     struct option *choice = NULL;
 
@@ -660,32 +660,32 @@ main(int argc, char *argv[])
 
     /* Get path to the shared library */
     for (size_t size = 1<<6; ; size += 1<<6) {
-         char preload[size];
-         debugf("resolving /proc/self/exe with %lu byte", size);
+        char preload[size];
+        debugf("resolving /proc/self/exe with %lu byte", size);
 
-         strncpy(preload, "LD_PRELOAD=", sizeof preload);
-         size_t prefix = strlen(preload);
+        strncpy(preload, "LD_PRELOAD=", sizeof preload);
+        size_t prefix = strlen(preload);
 #ifdef __linux__
-         ssize_t ret = readlink("/proc/self/exe", preload + prefix,
-                                sizeof preload - prefix);
+        ssize_t ret = readlink("/proc/self/exe", preload + prefix,
+                               sizeof preload - prefix);
 
-         assert(-1 <= ret);
-         if (-1 == ret) {
-             fail("readlink", true);
-         }
-         if (sizeof preload - prefix == (size_t) ret) {
-              /* the memory automatically allocated in PRELOAD was not
-               * sufficient to store the resolved file name.  We will
-               * proceed to allocate more memory and and attempt
-               * resolving the symbolic link path again. */
-              continue;
-         }
-         assert('\0' == preload[prefix + (size_t)ret]);
+        assert(-1 <= ret);
+        if (-1 == ret) {
+            fail("readlink", true);
+        }
+        if (sizeof preload - prefix == (size_t) ret) {
+            /* the memory automatically allocated in PRELOAD was not
+             * sufficient to store the resolved file name.  We will
+             * proceed to allocate more memory and and attempt
+             * resolving the symbolic link path again. */
+            continue;
+        }
+        assert('\0' == preload[prefix + (size_t)ret]);
 #else
 #error "System is not supported"
 #endif
 
-         execvpe(argv[optind], argv + optind, (char*[]) {preload, conf, NULL});
-         fail("exec", true);
+        execvpe(argv[optind], argv + optind, (char*[]) {preload, conf, NULL});
+        fail("exec", true);
     }
 }
