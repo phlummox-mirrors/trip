@@ -422,8 +422,9 @@ enter(char *entry)
 
 /* List all supported functions */
 static void __attribute__((noreturn))
-list(const char *)
+list(const char *unused)
 {
+    (void) unused;
     assert(!is_lib);
 
     for (unsigned i = 0; i < LENGTH(names); ++i) {
@@ -522,8 +523,9 @@ check_exec(const char *exec)
 }
 
 static void __attribute__((noreturn))
-version(const char *)
+version(const char *unused)
 {
+    (void) unused;
     dprintf(STDOUT_FILENO,
             "version \t" VERSION "\n"
             "compiler\t" COMPILER "\n"
