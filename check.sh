@@ -1,7 +1,7 @@
 #!/bin/sh
 # Check if trip has been installed
 
-set -e
+set -eu
 
 EXPECTED="$(realpath "$1/trip")"
 for file in $(echo "$PATH" | awk -v RS=: '{ print $1 "/trip" }')
