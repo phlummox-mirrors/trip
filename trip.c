@@ -605,6 +605,14 @@ main(int argc, char *argv[])
         }
     }
     if (choice != NULL) {
+        /* if we have selected a specific mode of operation, the
+         * remaining flags will be ignored.  To avoid accidentally
+         * passing too many arguments that are then silently ignored,
+         * we instead remind the user of how to use Trip. */
+        if (optind < argc) {
+            usage(argv[0]);
+        }
+
         assert(NULL != choice->fn);
         choice->fn(choice->arg);
     }
