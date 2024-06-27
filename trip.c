@@ -333,78 +333,6 @@ ____trip_should_fail(char *name, int errv[], size_t errn)
     return false;
 }
 
-/* Resolve an errno NAME into a errno number.
- *
- * TODO: Avoid calling cpp more often than necessary by caching the
- * results. */
-static int
-derrno(char *name)
-{
-    assert(!is_lib);
-
-    /* From popen(3): "Since a pipe is by definition unidirectional,
-     * the type argument may specify only reading or writing, not
-     * both; the re- sulting stream is correspondingly read-only or
-     * write-only".
-     *
-     * For this reason we prepare a command that will pope the symbol
-     * we want to resolve when invoking the command, so that we can
-     * read the macro-expansion. */
-    FILE *cpp;
-    $sprintf(cmd, "echo \"%s\" | cpp -include errno.h", name) {
-        cpp = popen(cmd, "r");
-    }
-    if (NULL == cpp) {
-        perror("popen");
-        return 0;
-    }
-
-    char line[BUFSIZ];
-    long val = -1;
-    while ((fgets(line, sizeof(line), cpp)) != NULL) {
-        if (sizeof(line) - 1 == strlen(line)
-            && line[sizeof(line) - 2] != '\n') {
-            int c;		/* empty out the rest of the line */
-            while ((c = fgetc(cpp)), !(c == '\n' || c == EOF));
-            if (c == EOF)
-                 goto close;
-        }
-
-        if ('#' == line[0] || '\n' == line[0] || isalpha(line[0])) {
-            continue;		/* ignore comments, empty lines and C
-                                 * code (probably declarations). */
-        }
-
-        char *end;
-        errno = 0;
-        val = strtol(line, &end, 10);
-        if (!('\0' == *end || '\n' == *end) || 0 != errno) {
-            dprintf(STDERR_FILENO, "Expected a number \"%s\" (for %s)\n", line,
-                    name);
-            exit(EXIT_FAILURE);
-        }
-
-        break;
-    }
-    if (ferror(cpp)) {
-        perror("fgets");
-        exit(EXIT_FAILURE);
-    }
-
-  close:
-    if (-1 == pclose(cpp)) {
-        perror("popen");
-        exit(EXIT_FAILURE);
-    }
-
-    if (0 > val) {
-        dprintf(STDERR_FILENO, "Failed to resolve %s\n", line);
-        exit(EXIT_FAILURE);
-    }
-
-    return (int) val;
-}
-
 /* Parse and add an ENTRY to the table entries. */
 static void
 enter(char *entry)
@@ -465,11 +393,11 @@ enter(char *entry)
         for (unsigned i = 0; i < strlen(error); ++i) {
             error[i] = (char) toupper(error[i]);
         }
-        entries[count].error = derrno(error);
         for (unsigned i = 0; i < LENGTH(names); ++i) {
             if (!strcmp(names[i].name, func)) {
                 for (unsigned j = 0; j < LENGTH(names[i].errs); ++j) {
-                    if (names[i].errs[j].no == entries[count].error) {
+                    if (!strcmp(names[i].errs[j].name, error)) {
+                        entries[count].error = names[i].errs[j].no;
                         goto found_it;
                     }
                 }
