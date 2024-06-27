@@ -416,7 +416,7 @@ enter(char *entry)
 
 /* List all supported functions */
 static void __attribute__((noreturn))
-list(void)
+list(const char *)
 {
     assert(!is_lib);
 
@@ -428,7 +428,7 @@ list(void)
 
 /* List all supported errno values for func. */
 static void __attribute__((noreturn))
-list_errors(const char func[static 1])
+list_errors(const char *func)
 {
     if (check(func) == NULL) {
         dprintf(STDERR_FILENO, "Unknown function \"%s\"\n", func);
@@ -447,9 +447,19 @@ list_errors(const char func[static 1])
     abort();
 }
 
+static void __attribute__((noreturn))
+version(const char *)
+{
+    dprintf(STDOUT_FILENO,
+            "version \t" VERSION "\n"
+            "compiler\t" COMPILER "\n"
+            "built   \t" __TIMESTAMP__ "\n") ;
+    exit(EXIT_SUCCESS);
+}
+
 /* Print a usage string and terminate */
 static void __attribute__((noreturn))
-usage(char *argv0)
+usage(const char *argv0)
 {
     assert(!is_lib);
 
@@ -481,21 +491,21 @@ main(int argc, char *argv[])
         exit(EXIT_FAILURE);
     }
 
+    struct option {
+        void (*fn)(const char *); char *arg;
+    } options[1 << CHAR_BIT] = {
+        ['l'] = { list,          NULL    },
+        ['e'] = { list_errors,   NULL    },
+        ['V'] = { version,       NULL    },
+        ['h'] = { usage,         argv[0] },
+    };
+    struct option *choice = NULL;
+
     /* Otherwise we are being invoked to wrap an actual call.  Let us *
      * start by parsing the command line. */
     int opt;
     while ((opt = getopt(argc, argv, "mle:Vdh")) != -1) {
         switch (opt) {
-        case 'l':
-            list();
-        case 'e':
-            list_errors(optarg);
-        case 'V':
-            dprintf(STDOUT_FILENO,
-                    "version \t" VERSION "\n"
-                    "compiler\t" COMPILER "\n"
-                    "built   \t" __TIMESTAMP__ "\n") ;
-            exit(EXIT_SUCCESS);
         case 'd':
 #ifndef NDEBUG
             debug_mode = true;
@@ -504,10 +514,24 @@ main(int argc, char *argv[])
             exit(EXIT_FAILURE);
 #endif
             break;
-        case 'h':
-        default:		/* '?' */
-            usage(argv[0]);
+        default:
+            if (NULL == options[opt].fn) {
+                exit(EXIT_FAILURE); /* "invalid option" */
+            }
+            if (NULL != choice) {
+                dprintf(STDERR_FILENO, "%s: contradictory flags\n", argv[0]);
+                exit(EXIT_FAILURE);
+            }
+
+            choice = &options[opt];
+            if (choice->arg == NULL) {
+                choice->arg = optarg;
+            }
         }
+    }
+    if (choice != NULL) {
+        assert(NULL != choice->fn);
+        choice->fn(choice->arg);
     }
 
     if (optind >= argc) {
