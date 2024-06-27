@@ -1,4 +1,4 @@
-# Copyright 2022, 2023 Philip Kaludercic
+# Copyright 2022, 2023, 2024 Philip Kaludercic
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -51,6 +51,8 @@ function gen() {
     }
     seen[data["name"]] = 1;
 
+    errno = gensub(/E[[:alnum:]]*/, "E(\\0)" , "g", data["errno"])
+
     print                          \
         "DEF(" data["return"] ",", \
         data["name"] ",",          \
@@ -59,7 +61,7 @@ function gen() {
              : "void") "),",       \
         "(" args "),",             \
         "(" data["fail"] "),",     \
-        data["errno"] ")"
+        errno ")"
     delete data;
 }
 

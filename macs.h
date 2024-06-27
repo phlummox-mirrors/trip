@@ -1,4 +1,4 @@
-/* Copyright 2020-2023 Philip Kaludercic
+/* Copyright 2020-2024 Philip Kaludercic
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -31,3 +31,5 @@
                : (((real) dlsym(RTLD_NEXT, #name)) args);		\
      }
 #endif
+
+#define E(e) e

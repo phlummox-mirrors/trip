@@ -66,12 +66,17 @@ static bool debug_mode = false;
 
 /* list of known commands */
 #define DEF(ret, name, params, args, fail, ...)	{ #name, { __VA_ARGS__ }},
+#define E(e) { .no = e, .name = #e }
 static struct entry_name {
     char *name;
-    int errs[256/sizeof(int)-sizeof(char*)]; /* adjust if necessary */
+    struct {
+        int no;
+        char *name;
+    } errs[256/sizeof(int)-sizeof(char*)]; /* adjust if necessary */
 } names[] = {
 #include "/dev/stdin"
 };
+#undef E
 #undef DEF
 
 /* Declare and format a string on the stack. */
@@ -464,7 +469,7 @@ enter(char *entry)
         for (unsigned i = 0; i < LENGTH(names); ++i) {
             if (!strcmp(names[i].name, func)) {
                 for (unsigned j = 0; j < LENGTH(names[i].errs); ++j) {
-                    if (names[i].errs[j] == entries[count].error) {
+                    if (names[i].errs[j].no == entries[count].error) {
                         goto found_it;
                     }
                 }
@@ -504,13 +509,14 @@ list_errors(const char func[static 1])
 
     for (unsigned i = 0; i < LENGTH(names); ++i) {
         if (!strcmp(names[i].name, func)) {
-            for (unsigned j = 0; names[i].errs[j]; ++j) {
-                puts(strerrorname_np(names[i].errs[j]));
+            for (unsigned j = 0; names[i].errs[j].no != 0; ++j) {
+                puts(names[i].errs[j].name);
             }
+            exit(EXIT_SUCCESS);
         }
     }
 
-    exit(EXIT_SUCCESS);
+    abort();
 }
 
 /* Print a usage string and terminate */
