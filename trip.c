@@ -597,7 +597,7 @@ main(int argc, char *argv[])
                 exit(EXIT_FAILURE); /* "invalid option" */
             }
             if (NULL != choice) {
-                failf("%s: contradictory flags\n", argv[0]);
+                failf("%s: contradictory flags", argv[0]);
             }
 
             choice = &options[opt];
