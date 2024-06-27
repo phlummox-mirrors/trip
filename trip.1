@@ -12,6 +12,7 @@
 .Nm
 .Op Fl l
 .Op Fl V
+.Op Fl e Ar FUNC
 .Op Fl h
 .Sh DESCRIPTION
 Using
@@ -45,6 +46,14 @@ knows how to
 .Qq trip .
 .It Fl V
 Print version and build information.
+.It Fl e Ar FUNC
+List all
+.Li errno
+values that
+.Nm
+knows
+.Ar FUNC
+to set.
 .It Fl h
 Print a help message.
 .It Fl d
