@@ -529,7 +529,7 @@ version(const char *unused)
     dprintf(STDOUT_FILENO,
             "version \t" VERSION "\n"
             "compiler\t" COMPILER "\n"
-            "built   \t" __TIMESTAMP__ "\n") ;
+            "built   \t" __DATE__ ", " __TIME__ "\n") ;
     exit(EXIT_SUCCESS);
 }
 
