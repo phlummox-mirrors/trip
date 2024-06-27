@@ -80,6 +80,19 @@ static struct entry_name {
 #undef E
 #undef DEF
 
+static char *argv0;
+
+static void __attribute__((noreturn))
+fail(const char reason[static 1], const bool print_emsg)
+{
+     dprintf(STDERR_FILENO, "%s: %s%s%s\n",
+             argv0,
+             reason,
+             print_emsg ? ": ": "",
+             print_emsg ? strerror(errno) : "");
+     exit(EXIT_FAILURE);
+}
+
 /* Declare and format a string on the stack. */
 #define _$sprintf(buf, c, fmt, ...)                             \
     for (char buf[snprintf(NULL, 0, fmt, __VA_ARGS__) + 1],     \
@@ -89,6 +102,10 @@ static struct entry_name {
          c = '\0')
 #define $sprintf(buf, ...)                                 \
      _$sprintf(buf, XGLUE(__c_, __COUNTER__), __VA_ARGS__)
+
+#define failf(fmt, ...)                                 \
+    do $sprintf(_, fmt, __VA_ARGS__) fail(_, false);    \
+    while (0)
 
 #ifdef NDEBUG
 #define assert(_)  do { (void) 0; } while (0)
@@ -218,9 +235,7 @@ init(void)
     char *tok = NULL, *s1 = NULL, *s2 = NULL;
     while (NULL != (tok = strtok_r(tok ? NULL : copy, RS, &s1))) {
         if (count >= LENGTH(entries)) {
-            dprintf(STDERR_FILENO, "Overlong configuration (%d >= %u)\n",
-                    count, LENGTH(entries));
-            abort();
+            failf("Overlong configuration (%d >= %u)", count, LENGTH(entries));
         }
 
         struct entry *e = &entries[count];
@@ -237,32 +252,27 @@ init(void)
 
         char *chance = strtok_r(NULL, GS, &s2);
         if (NULL == chance) {
-            dprintf(STDERR_FILENO, "Malformed trip configuration \"%s\"\n", conf);
-            abort();
+            failf("Malformed trip configuration \"%s\"", conf);
         }
 
         char *end;
         errno = 0;
         e->chance = strtod(chance, &end);
         if ('\0' != *end || (0 == e->error && 0 != errno)) {
-            dprintf(STDERR_FILENO, "Malformed trip chance \"%s\"", chance);
-            if (errno != 0)
-                 perror("strtod");
-            abort();
+            $sprintf(_, "Malformed trip chance \"%s\"", chance) {
+                fail(_, errno != 0);
+            }
         }
 
         char *code = strtok_r(NULL, GS, &s2);
         if (NULL == code) {
-            dprintf(STDERR_FILENO, "Malformed trip code \"%s\"\n", conf);
-
-            abort();
+            failf("Malformed trip code \"%s\"", conf);
         }
 
         errno = 0;
         e->error = (int) strtol(code, &end, 16);
         if (*end != '\0' || errno != 0) {
-            dprintf(STDERR_FILENO, "Malformed trip error code \"%s\"\n", code);
-            abort();
+            failf("Malformed trip error code \"%s\"", code);
         }
 
         count++;
@@ -344,12 +354,10 @@ enter(char *entry)
     char *func, *chance, *error;
     func = strtok(entry, DELIM);
     if (!func) {
-        dprintf(STDERR_FILENO, "Must pass a non-empty function name\n");
-        exit(EXIT_FAILURE);
+        fail("Must pass a non-empty function name\n", false);
     }
     if (check(func) == NULL) {
-        dprintf(STDERR_FILENO, "Unknown function \"%s\", cannot trip\n", func);
-        exit(EXIT_FAILURE);
+        failf("Unknown function \"%s\", cannot trip", func);
     }
 
     chance = strtok(NULL, DELIM);
@@ -373,22 +381,19 @@ enter(char *entry)
     if (NULL != chance) {
         num = strtod(chance, &end);
         if (*end != '\0' || (num == 0 && errno != 0)) {
-            dprintf(STDERR_FILENO, "Cannot parse chance \"%s\"\n", chance);
-            exit(EXIT_FAILURE);
+            failf("Cannot parse chance \"%s\"", chance);
         }
     }
 
     if (0 >= num) {
-        dprintf(STDERR_FILENO, "The chance %s (for %s) is not positive\n", chance,
-                func);
-        exit(EXIT_FAILURE);
+        failf("The chance %s (for %s) is not positive", chance,
+              func);
     }
     if (1 >= num) {
         entries[count].chance = num;
     } else {
-        dprintf(STDERR_FILENO, "The chance %g (for %s) is greater than 1\n", num,
-                func);
-        exit(EXIT_FAILURE);
+        failf("The chance %g (for %s) is greater than 1", num,
+              func);
     }
 
     if (NULL != error) {
@@ -406,8 +411,7 @@ enter(char *entry)
                 break;
             }
         }
-        dprintf(STDERR_FILENO, "%s is not expected to return %s\n", func, error);
-        exit(EXIT_FAILURE);
+        failf("%s is not expected to return %s", func, error);
 
       found_it:
         ;
@@ -433,8 +437,7 @@ static void __attribute__((noreturn))
 list_errors(const char *func)
 {
     if (check(func) == NULL) {
-        dprintf(STDERR_FILENO, "Unknown function \"%s\"\n", func);
-        exit(EXIT_FAILURE);
+        failf("Unknown function \"%s\"", func);
     }
 
     for (unsigned i = 0; i < LENGTH(names); ++i) {
@@ -462,13 +465,11 @@ check_exec(const char *exec)
     } else {
         PATH = getenv("PATH");
         if (NULL == PATH) {
-            dprintf(STDERR_FILENO, "no $PATH set\n");
-            exit(EXIT_FAILURE);
+            fail("no $PATH set", false);
         }
         PATH = strdup(PATH);      /* strtok is destructive */
         if (NULL == PATH) {
-            perror("strdup");
-            exit(EXIT_FAILURE);
+            fail("strdup", true);
         }
 
         nm = NULL; dir = NULL;
@@ -483,8 +484,7 @@ check_exec(const char *exec)
             close(fd);
         }
         if (dir == NULL) {
-            dprintf(STDERR_FILENO, "failed to locate %s in $PATH\n", exec);
-            exit(EXIT_FAILURE);
+            failf("failed to locate %s in $PATH", exec);
         }
         free(PATH);
     }
@@ -492,8 +492,7 @@ check_exec(const char *exec)
         nm = popen(cmd, "r");
     }
     if (NULL == nm) {
-        perror("popen");
-        exit(EXIT_FAILURE);
+        fail("popen", true);
     }
 
     while (NULL != fgets(line, sizeof line, nm)) {
@@ -505,23 +504,18 @@ check_exec(const char *exec)
         puts(func);
     }
     if (ferror(nm)) {
-        perror("fgets");
-        exit(EXIT_FAILURE);
+        fail("fgets", true);
     }
 
     status = pclose(nm);
     if (-1 == status) {
-        perror("pclose");
-        exit(EXIT_FAILURE);
+        fail("pclose", true);
     }
     if (!WIFEXITED(status)) {
-        dprintf(STDERR_FILENO, "nm failed to terminate normally\n");
-        exit(EXIT_FAILURE);
+        fail("nm failed to terminate normally", false);
     }
     if (0 != WEXITSTATUS(status)) {
-        dprintf(STDOUT_FILENO, "nm failed with status %d\n",
-                WEXITSTATUS(status));
-        exit(EXIT_FAILURE);
+        failf("nm failed with status %d", WEXITSTATUS(status));
     }
 
     exit(EXIT_SUCCESS);
@@ -561,6 +555,7 @@ main(int argc, char *argv[])
 {
      _Static_assert(0 < LENGTH(names), "The names array is empty");
 
+    argv0 = argv[0];
     is_lib = false;
 
     /* If the environmental variable is set, we are currently being
@@ -592,8 +587,7 @@ main(int argc, char *argv[])
 #ifndef NDEBUG
             debug_mode = true;
 #else
-            dprintf(STDERR_FILENO, "trip not build with debugging option\n");
-            exit(EXIT_FAILURE);
+            fail("trip not build with debugging option", false);
 #endif
             break;
         default:
@@ -601,8 +595,7 @@ main(int argc, char *argv[])
                 exit(EXIT_FAILURE); /* "invalid option" */
             }
             if (NULL != choice) {
-                dprintf(STDERR_FILENO, "%s: contradictory flags\n", argv[0]);
-                exit(EXIT_FAILURE);
+                failf("%s: contradictory flags\n", argv[0]);
             }
 
             choice = &options[opt];
@@ -635,26 +628,22 @@ main(int argc, char *argv[])
     size_t size = 0;
     FILE *h = open_memstream(&conf, &size);
     if (NULL == h) {
-         perror("open_memstream");
-         exit(EXIT_FAILURE);
+        fail("open_memstream", true);
     }
 
     if (0 > fprintf(h, "%s=", ENVCONFNAME)) {
-        perror("printf");
-        exit(EXIT_FAILURE);
+        fail("printf", true);
     }
     if (debug_mode) {
         if (EOF == putc('D', h)) {
-            perror("putc");
-            exit(EXIT_FAILURE);
+            fail("putc", true);
         }
     }
     for (unsigned i = 0; i < count; ++i) {
         if (0 > fprintf(h, "%s" GS "%a" GS "%x" RS,
                         entries[i].name, entries[i].chance,
                         entries[i].error)) {
-            perror("printf");
-            exit(EXIT_FAILURE);
+            fail("printf", true);
         }
     }
     fclose(h);
@@ -672,8 +661,7 @@ main(int argc, char *argv[])
 
          assert(-1 <= ret);
          if (-1 == ret) {
-              perror("readlink");
-              exit(EXIT_FAILURE);
+             fail("readlink", true);
          }
          if (sizeof preload - prefix == (size_t) ret) {
               /* the memory automatically allocated in PRELOAD was not
@@ -688,7 +676,6 @@ main(int argc, char *argv[])
 #endif
 
          execvpe(argv[optind], argv + optind, (char*[]) {preload, conf, NULL});
-         perror("exec");
-         exit(EXIT_FAILURE);
+         fail("exec", true);
     }
 }
