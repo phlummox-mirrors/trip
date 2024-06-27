@@ -16,6 +16,7 @@
 
 #include <ctype.h>
 #include <dlfcn.h>
+#include <fcntl.h>
 #include <errno.h>
 #include <limits.h>
 #include <stdatomic.h>
@@ -448,6 +449,84 @@ list_errors(const char *func)
     abort();
 }
 
+/* print a list of all functions that trip could affect */
+static void __attribute__((noreturn))
+check_exec(const char *exec)
+{
+    FILE *nm;
+    char line[BUFSIZ], *PATH, *dir, *func;
+    int status, fd;
+
+    if (0 == access(exec, X_OK)) {
+        dir = exec[0] == '/' ? "" : ".";
+    } else {
+        PATH = getenv("PATH");
+        if (NULL == PATH) {
+            fputs("no $PATH set\n", stderr);
+            exit(EXIT_FAILURE);
+        }
+        PATH = strdup(PATH);      /* strtok is destructive */
+        if (NULL == PATH) {
+            perror("strdup");
+            exit(EXIT_FAILURE);
+        }
+
+        nm = NULL; dir = NULL;
+        while ((dir = strtok(dir == NULL ? PATH : NULL, ":"))) {
+            fd = open(dir, O_DIRECTORY);
+            if (-1 == fd) { continue; } /* invalid component */
+
+            if (0 == faccessat(fd, exec, X_OK, AT_EACCESS)) {
+                close(fd);
+                break;
+            }
+            close(fd);
+        }
+        if (dir == NULL) {
+            fprintf(stderr, "failed to locate %s in $PATH\n", exec);
+            exit(EXIT_FAILURE);
+        }
+        free(PATH);
+    }
+    $sprintf(cmd, "nm -uP '%s/%s'", dir, exec) {
+        nm = popen(cmd, "r");
+    }
+    if (NULL == nm) {
+        perror("popen");
+        exit(EXIT_FAILURE);
+    }
+
+    while (NULL != fgets(line, sizeof line, nm)) {
+        func = strtok(line, " @");
+        if (func == NULL || check(func) == NULL) {
+            continue;
+        }
+
+        puts(func);
+    }
+    if (ferror(nm)) {
+        perror("fgets");
+        exit(EXIT_FAILURE);
+    }
+
+    status = pclose(nm);
+    if (-1 == status) {
+        perror("pclose");
+        exit(EXIT_FAILURE);
+    }
+    if (!WIFEXITED(status)) {
+        fputs("nm failed to terminate normally\n", stderr);
+        exit(EXIT_FAILURE);
+    }
+    if (0 != WEXITSTATUS(status)) {
+        fprintf(stderr, "nm failed with status %d\n",
+                WEXITSTATUS(status));
+        exit(EXIT_FAILURE);
+    }
+
+    exit(EXIT_SUCCESS);
+}
+
 static void __attribute__((noreturn))
 version(const char *)
 {
@@ -468,6 +547,7 @@ usage(const char *argv0)
     dprintf(STDERR_FILENO, "Flags:\n"
             "\t-l\tList all supported functions\n"
             "\t-e FUNC\tList all errno values for FUNC\n"
+            "\t-c EXEC\tList all tripable functions in EXEC\n"
 #ifndef NDEBUG
             "\t-d\tPrint debugging information\n"
 #endif
@@ -497,6 +577,7 @@ main(int argc, char *argv[])
     } options[1 << CHAR_BIT] = {
         ['l'] = { list,          NULL    },
         ['e'] = { list_errors,   NULL    },
+        ['c'] = { check_exec,    NULL    },
         ['V'] = { version,       NULL    },
         ['h'] = { usage,         argv[0] },
     };
@@ -505,7 +586,7 @@ main(int argc, char *argv[])
     /* Otherwise we are being invoked to wrap an actual call.  Let us *
      * start by parsing the command line. */
     int opt;
-    while ((opt = getopt(argc, argv, "mle:Vdh")) != -1) {
+    while ((opt = getopt(argc, argv, "mlc:e:Vdh")) != -1) {
         switch (opt) {
         case 'd':
 #ifndef NDEBUG

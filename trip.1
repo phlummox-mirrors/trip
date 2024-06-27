@@ -13,6 +13,7 @@
 .Op Fl l
 .Op Fl V
 .Op Fl e Ar FUNC
+.Op Fl c Ar EXEC
 .Op Fl h
 .Sh DESCRIPTION
 Using
@@ -54,6 +55,14 @@ values that
 knows
 .Ar FUNC
 to set.
+.It Fl c Ar EXEC
+Using
+.Xr nm 1 ,
+try to find out what functions a program
+.Ar EXEC
+might use and
+.Nm
+supports.
 .It Fl h
 Print a help message.
 .It Fl d
