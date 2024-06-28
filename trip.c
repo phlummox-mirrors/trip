@@ -34,7 +34,7 @@
 
 #define ENVCONFNAME "____TRIP_CONFIGURATION"
 #define VERSION "0.1.0"
-#define USAGE "Usage: %s [func[:chance[:errno]]] command args\n"
+#define USAGE "Usage: %s [func[:chance[:errno]]][,...] command args\n"
 
 #ifndef COMPILER
 #define COMPILER "unknown"
