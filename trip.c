@@ -47,6 +47,16 @@
 #define GLUE(A, B) A ## B
 #define XGLUE(A, B) GLUE(A, B)
 
+#if defined(__has_c_attribute) && __has_c_attribute(noreturn)
+#define noreturn    [[noreturn]]
+#elif defined(__GNUC__) || defined(__clang__) || defined(__INTEL_LLVM_COMPILER)
+#define noreturn    __attribute__ ((noreturn))
+#elif defined(__STDC_VERSION__) && __STDC_VERSION__ >= 201112L
+#define noreturn    _Noreturn
+#else
+#define noreturn    /**/
+#endif
+
 /* Parsed configuration */
 static unsigned count = 0;
 static struct entry {
@@ -82,7 +92,7 @@ static struct entry_name {
 
 static char *argv0;
 
-static void __attribute__((noreturn))
+noreturn static void
 fail(const char reason[static 1], const bool print_emsg)
 {
     dprintf(STDERR_FILENO, "%s: %s%s%s\n",
@@ -421,7 +431,7 @@ enter(char *entry)
 }
 
 /* List all supported functions */
-static void __attribute__((noreturn))
+noreturn static void
 list(const char *unused)
 {
     (void) unused;
@@ -434,7 +444,7 @@ list(const char *unused)
 }
 
 /* List all supported errno values for func. */
-static void __attribute__((noreturn))
+noreturn static void
 list_errors(const char *func)
 {
     if (check(func) == NULL) {
@@ -454,7 +464,7 @@ list_errors(const char *func)
 }
 
 /* print a list of all functions that trip could affect */
-static void __attribute__((noreturn))
+noreturn static void
 check_exec(const char *exec)
 {
     FILE *nm;
@@ -521,7 +531,7 @@ check_exec(const char *exec)
     exit(EXIT_SUCCESS);
 }
 
-static void __attribute__((noreturn))
+noreturn static void
 version(const char *unused)
 {
     (void) unused;
@@ -533,7 +543,7 @@ version(const char *unused)
 }
 
 /* Print a usage string and terminate */
-static void __attribute__((noreturn))
+noreturn static void
 usage(const char *argv0)
 {
     assert(!is_lib);
