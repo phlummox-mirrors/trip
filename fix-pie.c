@@ -1,7 +1,7 @@
 /* REMOVE THE PIE-FLAG FROM AN EXECUTABLE
  *
  * Copyright (c) 2020  Yubo Xie <xyb@xyb.name>
- * Copyright (c) 2023  Philip Kaludercic
+ * Copyright (c) 2023, 2024  Philip Kaludercic
  *
  * Permission  is  hereby  granted,  free of  charge,  to  any  person
  * obtaining  a copy  of  this software  and associated  documentation
@@ -51,6 +51,18 @@
 #include <sys/stat.h>
 #include <unistd.h>
 
+static int fd = -1;
+
+static void
+clenaup(void)
+{
+     if (-1 != fd) {
+          if (-1 == close(fd)) {
+               perror("close");
+          }
+     }
+}
+
 int
 main(int argc, char *argv[])
 {
@@ -58,7 +70,6 @@ main(int argc, char *argv[])
     Elf64_Ehdr *ehdr;           /* ELF header */
     Elf64_Shdr *shdr;           /* section header */
     Elf64_Dyn *dyn;             /* "dynamic" section */
-    int fd;
     unsigned i, j;
     char *mem;
 
@@ -71,9 +82,10 @@ main(int argc, char *argv[])
         perror("open");
         return EXIT_FAILURE;
     }
+    atexit(clenaup);
+
     if (-1 == fstat(fd, &stat)) {
         perror("fstat");
-        close(fd);
         return EXIT_FAILURE;
     }
 
@@ -113,9 +125,6 @@ main(int argc, char *argv[])
                     dyn->d_un.d_val &= ~((Elf64_Xword) DF_1_PIE);
                 }
 
-                if (close(fd)) {
-                    perror("close");
-                }
                 return EXIT_SUCCESS;    /* mors mihi lucrum */
             }
         }
