@@ -19,4 +19,4 @@
 
 #define LENGTH(arr) (unsigned) (sizeof(arr)/sizeof(*(arr)))
 
-bool ____trip_should_fail(char *name, int *errv, size_t errn);
+bool ____trip_should_fail(const char *name, const int *errv, size_t errn);

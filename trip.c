@@ -60,7 +60,7 @@
 /* Parsed configuration */
 static unsigned count = 0;
 static struct entry {
-    char *name;
+    const char *name;
     double chance;
     int rate;
     int error;
@@ -79,10 +79,10 @@ static bool debug_mode = false;
 #define DEF(ret, name, params, args, fail, ...)	{ #name, { __VA_ARGS__ }},
 #define E(e) { .no = e, .name = #e }
 static struct entry_name {
-    char *name;
+    const char *const name;
     struct {
         int no;
-        char *name;
+        const char *const name;
     } errs[256/sizeof(int)-sizeof(char*)]; /* adjust if necessary */
 } names[] = {
 #include "/dev/stdin"
@@ -90,7 +90,7 @@ static struct entry_name {
 #undef E
 #undef DEF
 
-static char *argv0;
+static const char *argv0;
 
 noreturn static void
 fail(const char reason[static 1], const bool print_emsg)
@@ -123,13 +123,13 @@ fail(const char reason[static 1], const bool print_emsg)
 #define debugf(...) (void) 0
 #else
 
-static void _debug(char *words[], unsigned n);
+static void _debug(const char *words[], unsigned n);
 
 static void
-do_assert(char *val, unsigned linenr)
+do_assert(const char *val, unsigned linenr)
 {
     $sprintf(line, "(%s:%d)", __FILE__, linenr) {
-        _debug((char*[]){"Assertion failed", val, line}, 3);
+        _debug((const char*[]){"Assertion failed", val, line}, 3);
     }
     abort();
 }
@@ -142,11 +142,11 @@ do_assert(char *val, unsigned linenr)
     } while (0)
 
 static void
-_debug(char *words[], unsigned n)
+_debug(const char *words[], unsigned n)
 {
     typedef ssize_t (wt)(int, const void *, size_t);
     static wt *real_write = NULL;
-    char *prefix = "[trip]";
+    const char *const prefix = "[trip]";
 
     if (NULL == real_write) {
         real_write = ((wt*) dlsym(RTLD_NEXT, "write"));
@@ -165,7 +165,7 @@ _debug(char *words[], unsigned n)
 #define debug(...)                              \
     do {                                        \
         if (!debug_mode) break;                 \
-        char *words[] = { __VA_ARGS__ };        \
+        const char *words[] = { __VA_ARGS__ };  \
         _debug(words, LENGTH(words));           \
     } while (0)
 
@@ -184,11 +184,11 @@ compar_name(const void *a, const void *b)
 }
 
 /* Check if a function is supported by trip */
-static char* __attribute__((pure))
+static const char* __attribute__((pure))
 check(const char *fn)
 {
     struct entry_name *entry =
-        bsearch(&((struct entry_name) { .name = (char * const) fn }),
+        bsearch(&((struct entry_name) { .name = (const char * const) fn }),
                 names,
                 LENGTH(names),
                 sizeof(struct entry_name),
@@ -226,7 +226,7 @@ init(void)
         return;			/* prevent concurrent re-initialisation */
     }
 
-    char *conf = getenv(ENVCONFNAME);
+    const char *conf = getenv(ENVCONFNAME);
     if (NULL == conf) {		/* no configuration, no cry */
         ready = !ready;
         return;
@@ -252,8 +252,8 @@ init(void)
         *e = (struct entry) { .name = strtok_r(tok, GS, &s2) };
         assert(NULL != e->name); /* otherwise we wouldn't be here */
 
-        char *dup;
-        if ((dup = check(e->name)) == NULL) {
+        const char *const dup = check(e->name);
+        if (dup == NULL) {
             debug("unknown function", e->name);
             continue;
         }
@@ -314,7 +314,7 @@ init(void)
 
 /* Failure predicate called by the trip stubs. */
 bool
-____trip_should_fail(char *name, int errv[], size_t errn)
+____trip_should_fail(const char *name, const int *errv, size_t errn)
 {
     if (!is_lib) return false;
 
