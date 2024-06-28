@@ -292,7 +292,6 @@ init(void)
     /* Initialise local PRNG (Mitchell-Moore, see TAOCP p. 26).  We use a
      * custom one so as to not interfere with rand from the standard
      * library. */
-    unsigned i = 0;
     unsigned long p = (unsigned long) (getpid() + getppid());
     unsigned long t;
     struct timeval tv;
@@ -301,8 +300,8 @@ init(void)
     } else {
         t = 1;
     }
-    rng[i] = p / t + t / p + t + p + t * p;
-    for (i = 1; i < LENGTH(rng); ++i) {
+    rng[0] = p / t + t / p + t + p + t * p;
+    for (unsigned i = 1; i < LENGTH(rng); ++i) {
         rng[i] = rng[i - 1] * p + t;
     }
 
@@ -317,7 +316,6 @@ init(void)
 bool
 ____trip_should_fail(char *name, int errv[], size_t errn)
 {
-    unsigned i;
     if (!is_lib) return false;
 
     /* Initialise failure data if necessary */
@@ -326,7 +324,7 @@ ____trip_should_fail(char *name, int errv[], size_t errn)
     /* FIXME: Replace the associative array with something that has less
      * of an overhead. */
     debug("intercepting", name);
-    for (i = 0; i < count; ++i) {
+    for (unsigned i = 0; i < count; ++i) {
         if (!!strcmp(name, entries[i].name)) {
             continue;
         }
