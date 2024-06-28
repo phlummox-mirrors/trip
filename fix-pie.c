@@ -82,7 +82,11 @@ main(int argc, char *argv[])
         perror("open");
         return EXIT_FAILURE;
     }
-    atexit(clenaup);
+    if (0 != atexit(clenaup)) {
+        perror("atexit");
+        /* don't fail here, because this is not fatal for the rest of
+         * the execution. */
+    }
 
     if (-1 == fstat(fd, &stat)) {
         perror("fstat");
