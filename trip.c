@@ -458,28 +458,33 @@ static void __attribute__((noreturn))
 check_exec(const char *exec)
 {
     FILE *nm;
-    char line[BUFSIZ], *PATH, *dir, *func;
+    char line[BUFSIZ], *PATH, *dir = NULL, *func;
     int status, fd;
 
-    if (0 == access(exec, X_OK)) {
-        dir = exec[0] == '/' ? "" : ".";
-    } else {
-        PATH = getenv("PATH");
-        if (NULL == PATH) {
-            fail("no $PATH set", false);
-        }
-        PATH = strdup(PATH);      /* strtok is destructive */
-        if (NULL == PATH) {
-            fail("strdup", true);
-        }
+    PATH = getenv("PATH");
+    if (NULL == PATH) {
+        fail("no $PATH set", false);
+    }
 
-        nm = NULL; dir = NULL;
-        while ((dir = strtok(dir == NULL ? PATH : NULL, ":"))) {
+    $sprintf(path_cpy, ".:%s", PATH) {
+        nm = NULL;
+        while ((dir = strtok(dir == NULL ? path_cpy : NULL, ":"))) {
+            debugf("looking for %s in '%s'...", exec, dir);
             fd = open(dir, O_DIRECTORY);
             if (-1 == fd) { continue; } /* invalid component */
 
             if (0 == faccessat(fd, exec, X_OK, AT_EACCESS)) {
+                debugf("found %s in '%s'", exec, dir);
                 close(fd);
+
+                assert(NULL != dir);
+                $sprintf(cmd, "nm -uP '%s/%s'", dir, exec) {
+                    debugf("executing \"%s\"", cmd);
+                    nm = popen(cmd, "r");
+                }
+                if (NULL == nm) {
+                    fail("popen", true);
+                }
                 break;
             }
             close(fd);
@@ -487,14 +492,8 @@ check_exec(const char *exec)
         if (dir == NULL) {
             failf("failed to locate %s in $PATH", exec);
         }
-        free(PATH);
     }
-    $sprintf(cmd, "nm -uP '%s/%s'", dir, exec) {
-        nm = popen(cmd, "r");
-    }
-    if (NULL == nm) {
-        fail("popen", true);
-    }
+    assert(nm != NULL);
 
     while (NULL != fgets(line, sizeof line, nm)) {
         func = strtok(line, " @");
